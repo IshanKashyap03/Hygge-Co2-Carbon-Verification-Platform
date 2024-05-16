@@ -28,7 +28,7 @@ contract CertificateFactory{
         emit CertificateCreated(msg.sender, computedHash, verificationHash);
     }
 
-    function verifyCertificateByUuidAndAmount(bytes32 verificationHash) public view returns (bool) {
+    function verifyCertificate(bytes32 verificationHash) public view returns (bool) {
         CO2EmissionCertificate certificate = certificates[verificationHash];
         return address(certificate) != address(0);
     }
