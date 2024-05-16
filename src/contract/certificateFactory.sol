@@ -9,7 +9,6 @@ contract CertificateFactory{
     address public publisher;
 
     mapping(string => CO2EmissionCertificate) public certificates;
-    mapping(string => mapping(uint => bool)) public uuidAndAmount;
 
     event CertificateCreated(string uuid, address owner, bytes32 computedHash, uint amount);
 
@@ -23,13 +22,17 @@ contract CertificateFactory{
         
         CO2EmissionCertificate newCertificate = new CO2EmissionCertificate(uuid, msg.sender, computedHash, amount);
         certificates[uuid] = newCertificate;
-        uuidAndAmount[uuid][amount] = true;
         
         emit CertificateCreated(uuid, msg.sender, computedHash, amount);
     }
 
     function verifyCertificateByUuidAndAmount(string memory uuid, uint amount) public view returns (bool) {
-        require(uuidAndAmount[uuid][amount], "Certificate not found");
-        return true;
+        CO2EmissionCertificate certificate = certificates[uuid];
+        if (address(certificate) == address(0)) {
+            // certificate not found
+            return false; 
+        }
+
+        return certificate.amount() == amount;
     }
 }
