@@ -2,45 +2,34 @@
 
 pragma solidity >=0.7.0 <0.9.0;
 
+import "./CO2EmissionCertificate.sol";
+
 contract CertificateFactory{
 
     address public publisher;
-    uint public certificateId = 0;
 
-    struct Certificate {
-        uint uuid;
-        address owner;
-        bytes32 computedHash;
-        uint amount;
-    }
+    mapping(string => CO2EmissionCertificate) public certificates;
+    mapping(string => mapping(uint => bool)) public uuidAndAmount;
 
-    mapping(bytes32 => Certificate) public certificates;
-    mapping(bytes32 => mapping(uint => bool)) public hashAndAmount;
-
-    event CertificateCreated(uint uuid, address owner, bytes32 computedHash, uint amount);
+    event CertificateCreated(string uuid, address owner, bytes32 computedHash, uint amount);
 
     constructor() {
         publisher = msg.sender;
     }
 
-    function createCertificate(bytes32 computedHash, uint amount) public returns (bytes32) {
+    function createCertificate(string memory uuid, bytes32 computedHash, uint amount) public{
         require(msg.sender == publisher, "Only the publisher can create certificates");
         require(amount > 0, "Amount must be greater than zero");
         
-        bytes32 hash = keccak256(abi.encode(certificateId, msg.sender, computedHash, amount));
-        certificateId++;
-        Certificate memory newCertificate = Certificate(certificateId, msg.sender, computedHash, amount);
-        certificates[hash] = newCertificate;
-        hashAndAmount[hash][amount] = true;
+        CO2EmissionCertificate newCertificate = new CO2EmissionCertificate(uuid, msg.sender, computedHash, amount);
+        certificates[uuid] = newCertificate;
+        uuidAndAmount[uuid][amount] = true;
         
-        emit CertificateCreated(newCertificate.uuid, newCertificate.owner, newCertificate.computedHash, newCertificate.amount);
-        return hash;
+        emit CertificateCreated(uuid, msg.sender, computedHash, amount);
     }
 
-    // for the regulator
-    function verifyCertificateByHashAndAmount(bytes32 hash, uint amount) public view returns (bool) {
-        // Check if the certificate exists
-        require(hashAndAmount[hash][amount], "Certificate not found");
+    function verifyCertificateByUuidAndAmount(string memory uuid, uint amount) public view returns (bool) {
+        require(uuidAndAmount[uuid][amount], "Certificate not found");
         return true;
     }
 }
