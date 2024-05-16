@@ -11,8 +11,7 @@ contract CertificateFactory{
     struct Certificate{
         uint uuid;
         address owner;
-        uint256 startTime;
-        uint256 endTime;
+        bytes32 computedHash;
         uint amount;
     }
 
@@ -23,23 +22,15 @@ contract CertificateFactory{
         publisher = msg.sender;
     }
 
-    function createCertificate(uint256 startTime, uint256 endTime, uint amount) public returns (bytes32){
+    function createCertificate(bytes32 computedHash, uint amount) public returns (bytes32){
         certificateId++;
-        Certificate memory newCertificate = Certificate(certificateId, msg.sender, startTime, endTime, amount);
+        Certificate memory newCertificate = Certificate(certificateId, msg.sender, computedHash, amount);
         // Encoding the certificate to bytes and then hashing it
-        bytes32 hash = keccak256(abi.encode(newCertificate.uuid, newCertificate.owner, newCertificate.startTime, newCertificate.endTime, newCertificate.amount));
+        bytes32 hash = keccak256(abi.encode(newCertificate.uuid, newCertificate.owner, newCertificate.computedHash, newCertificate.amount));
         certificates[hash] = newCertificate;
         hashAndAmount[hash][amount] = true;
         return hash;
     }
-
-    // function verifyCertificate(uint uuid, address owner, uint256 startTime, uint256 endTime, uint amount) public view returns(bool){
-    //     bytes32 hash = keccak256(abi.encode(uuid, owner, startTime, endTime, amount));
-    //     if(certificates[hash].owner != address(0)){
-    //         return true;
-    //     }
-    //     return false;
-    // }
 
     // for the regulator
     function verifyCertificateByHashAndAmount(bytes32 hash, uint amount) public view returns(bool){
