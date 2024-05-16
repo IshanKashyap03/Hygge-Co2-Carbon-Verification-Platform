@@ -33,13 +33,13 @@ contract CertificateFactory{
         return hash;
     }
 
-    function verifyCertificate(uint uuid, address owner, uint256 startTime, uint256 endTime, uint amount) public view returns(bool){
-        bytes32 hash = keccak256(abi.encode(uuid, owner, startTime, endTime, amount));
-        if(certificates[hash].owner != address(0)){
-            return true;
-        }
-        return false;
-    }
+    // function verifyCertificate(uint uuid, address owner, uint256 startTime, uint256 endTime, uint amount) public view returns(bool){
+    //     bytes32 hash = keccak256(abi.encode(uuid, owner, startTime, endTime, amount));
+    //     if(certificates[hash].owner != address(0)){
+    //         return true;
+    //     }
+    //     return false;
+    // }
 
     // for the regulator
     function verifyCertificateByHashAndAmount(bytes32 hash, uint amount) public view returns(bool){
