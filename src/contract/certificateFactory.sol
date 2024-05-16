@@ -18,6 +18,8 @@ contract CertificateFactory{
     mapping(bytes32 => Certificate) public certificates;
     mapping(bytes32 => mapping(uint => bool)) public hashAndAmount;
 
+    event CertificateCreated(uint uuid, address owner, bytes32 computedHash, uint amount);
+
     constructor(){
         publisher = msg.sender;
     }
@@ -29,6 +31,7 @@ contract CertificateFactory{
         bytes32 hash = keccak256(abi.encode(newCertificate.uuid, newCertificate.owner, newCertificate.computedHash, newCertificate.amount));
         certificates[hash] = newCertificate;
         hashAndAmount[hash][amount] = true;
+        emit CertificateCreated(newCertificate.uuid, newCertificate.owner, newCertificate.computedHash, newCertificate.amount);
         return hash;
     }
 
