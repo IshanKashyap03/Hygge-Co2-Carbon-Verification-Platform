@@ -3,15 +3,11 @@
 pragma solidity >=0.7.0 <0.9.0;
 
 contract CO2EmissionCertificate {
-    string public uuid;
-    address public owner;
+    address public publisher;
     bytes32 public computedHash;
-    uint public amount;
 
-    constructor(string memory _uuid, address _owner, bytes32 _computedHash, uint _amount) {
-        uuid = _uuid;
-        owner = _owner;
+    constructor(address _publisher, bytes32 _computedHash) {
+        publisher = _publisher;
         computedHash = _computedHash;
-        amount = _amount;
     }
 }
