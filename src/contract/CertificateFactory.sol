@@ -22,7 +22,7 @@ contract CertificateFactory{
     }
 
     function createCertificate(bytes32 computedHash, bytes32 verificationHash) public onlyPublisher {
-        CO2EmissionCertificate newCertificate = new CO2EmissionCertificate(uuid, msg.sender, computedHash, amount);
+        CO2EmissionCertificate newCertificate = new CO2EmissionCertificate(msg.sender, computedHash);
         certificates[verificationHash] = newCertificate;
 
         emit CertificateCreated(msg.sender, computedHash, verificationHash);
