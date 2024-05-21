@@ -1,0 +1,101 @@
+.emission-verification-card {
+    display: flex;
+    flex-direction: column;
+    margin: 80px auto;
+    padding: 0; 
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    width: 100%;
+    gap: 50px;
+}
+
+
+.title{
+    background-color: #598D9C;
+    color: #FAFAFA;
+    border-radius: 8px; 
+    padding: 20px 0px;
+    text-align: center;
+    font-family: 'Roboto Slab';
+    font-weight: 100;
+    font-size: 16px;
+    width: 100%;
+    margin: 0;
+}
+
+.verification-form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 50px;
+}
+
+.form-group{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    align-items: center;
+}
+
+.verification-form .form-group label{
+    color: #116881;
+    max-width: 300px;
+    word-wrap: break-word;
+    text-align: center; 
+    font-size: 16px;
+    font-family: 'Roboto Slab';
+}
+
+.verification-form .form-group input{
+    border: 0.6px solid #21677B;
+    border-radius: 20px;
+    max-width: 200px;
+    width: 100%;
+    padding: 5px 0px;
+    text-align: center;
+}
+
+.verify-button {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: 200px;
+    margin-bottom: 30px;
+}
+
+.emission-verification-card .verify-button button{
+    background-color: #18A0FB;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    padding: 10px 40px;
+    font-family: 'Roboto Slab';
+    font-weight: 400;
+    text-align: center;
+    font-size: 12px;
+}
+
+.verification-message{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 700;
+}
+
+.verified{
+    color: #21C54F;
+}
+
+.not-verified{
+    color: #FF3838;
+}
+
+.verified p{
+    color: black;
+}

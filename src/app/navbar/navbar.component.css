@@ -1,0 +1,29 @@
+.navbar{
+    display: flex;
+    background-color: #204A56;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px; 
+}
+
+.left-elements{
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.title{
+    font-family: 'Roboto Mono', monospace;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 36.93px;
+    color: white;
+}
+
+.hygge-logo img{
+    height: 30px;
+}
+
+.profile-logo img{
+    height: 30px;
+}
