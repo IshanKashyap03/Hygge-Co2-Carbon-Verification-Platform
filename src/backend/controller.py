@@ -1,16 +1,22 @@
 import certificate
 
 
-def verify_certificate(certificate_id: int, amount: float) -> bool:
+def verify_certificate(certificate_id: str, amount: float) -> dict:
     if amount < 0:
         # TODO: Add logging
-        return False
-    verification_hash = certificate.hash_data(str(certificate_id), str(amount))
-    return certificate.verify_certificate(verification_hash)
+        return {"status": "Error. Amount must be positive"}
+
+    verification_hash = certificate.hash_data(certificate_id, str(amount))
+    print(verification_hash)
+    if not certificate.verify_certificate(verification_hash):
+        return {"status": "Not Verified"}
+
+    # TODO: Search database for name
+    return {"status": "Verified", "companyName": "Satyam Steel"}
 
 
 def create_certificate(
-    certificate_id: int,
+    certificate_id: str,
     amount: float,
     start_time: int,
     end_time: int,
@@ -22,7 +28,7 @@ def create_certificate(
     if amount < 0:
         # TODO: Add logging
         return
-    verification_hash = certificate.hash_data(str(certificate_id), str(amount))
+    verification_hash = certificate.hash_data(certificate_id, str(amount))
     computed_hash = certificate.hash_data(
         str(certificate_id), str(amount), str(start_time), str(end_time), company_name
     )
@@ -32,11 +38,11 @@ def create_certificate(
 
 # Example usage
 def main():
-    certificate_id = 1
+    certificate_id = "1"
     start_time = 1715836780
     end_time = 1715836780
     company_name = "YourCompanyName"
-    amount = 100
+    amount = float(100)
 
     # Create a certificate
     create_certificate(certificate_id, amount, start_time, end_time, company_name)
@@ -46,4 +52,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

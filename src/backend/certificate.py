@@ -106,4 +106,6 @@ def create_certificate(computed_hash: str, verification_hash: str):
 
 
 def verify_certificate(verification_hash: str) -> bool:
-    return contract.functions.verifyCertificate(verification_hash).call()
+    status = contract.functions.verifyCertificate(verification_hash).call()
+    print(f"verify_certificates's {status = }")
+    return status
