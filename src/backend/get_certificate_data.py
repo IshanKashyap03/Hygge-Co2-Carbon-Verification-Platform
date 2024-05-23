@@ -15,13 +15,16 @@ def on_message(client, userdata, message):
     decoded_message = message.payload.decode()
     message_dict = json.loads(decoded_message)
 
-    certificate_id = message_dict.get('certificate_number')
-    amount = message_dict.get('total_co2_emissions')
-    start_time = message_dict.get('start_date')
-    end_time = message_dict.get('end_date')
-    company_name = message_dict.get('company_name')
+    # TODO: Check data for validity
+    certificate_id = message_dict.get("certificate_number")
+    amount = message_dict.get("total_co2_emissions")
+    start_time = message_dict.get("start_date")
+    end_time = message_dict.get("end_date")
+    company_name = message_dict.get("company_name")
 
-    create_certificate(certificate_id, amount, start_time, end_time, company_name)
+    create_certificate(
+        certificate_id, float(amount), start_time, end_time, company_name
+    )
 
 
 # Callback function when connecting to the broker
