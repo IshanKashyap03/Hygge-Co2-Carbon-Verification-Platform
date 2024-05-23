@@ -4,11 +4,11 @@
     </div>
     <form class="verification-form" [formGroup]="verificationForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
-            <label for="certificate-number">Enter Certificate Number</label>
+            <label class="required" for="certificate-number">Enter Certificate Number</label>
             <input type="text" id="certificate-number" name="certificate-number" formControlName="certificateNumber">
         </div>
         <div class="form-group">
-            <label for="carbon-emission">Enter Total Carbon Emission in Kg (from Certificate)</label>
+            <label class="required" for="carbon-emission">Enter Total Carbon Emission in Kg (from Certificate)</label>
             <input type="text" id="carbon-emission" name="carbon-emission" formControlName="carbonEmission">
         </div>
 

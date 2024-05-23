@@ -4,7 +4,7 @@ import certificate
 def verify_certificate(certificate_id: str, amount: float) -> dict:
     if amount < 0:
         # TODO: Add logging
-        return {"status": "Error. Amount must be positive"}
+        return {"status": "Error, amount must be positive"}
 
     verification_hash = certificate.hash_data(certificate_id, str(amount))
     print(verification_hash)

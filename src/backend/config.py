@@ -3,6 +3,13 @@ import os
 from typing import Final, Optional
 
 
+def extract_env_var(env_var: str) -> str:
+    value = os.getenv(env_var)
+    if value is None:
+        raise ValueError(f"{env_var} is required")
+    return value
+
+
 load_dotenv()
 ConstEnvAlias = Final[Optional[str]]
 
@@ -18,4 +25,20 @@ PRIVATE_KEY: Final[str] = (
     __PRIVATE_KEY
     if __PRIVATE_KEY
     else "0x58d23b55bc9cdce1f18c2500f40ff4ab7245df9a89505e9b1fa4851f623d241d"
+)
+
+
+# MQTT broker details
+CERTIFICATE_DATA_BROKER_URL: Final[str] = extract_env_var("CERTIFICATE_DATA_BROKER_URL")
+CERTIFICATE_DATA_BROKER_PORT: Final[int] = int(
+    extract_env_var("CERTIFICATE_DATA_BROKER_PORT")
+)
+CERTIFICATE_DATA_BROKER_USERNAME: Final[str] = extract_env_var(
+    "CERTIFICATE_DATA_BROKER_USERNAME"
+)
+CERTIFICATE_DATA_BROKER_PASSWORD: Final[str] = extract_env_var(
+    "CERTIFICATE_DATA_BROKER_PASSWORD"
+)
+CERTIFICATE_DATA_BROKER_TOPIC: Final[str] = extract_env_var(
+    "CERTIFICATE_DATA_BROKER_TOPIC"
 )

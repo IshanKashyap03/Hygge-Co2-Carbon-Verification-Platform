@@ -4,6 +4,8 @@ import { FormBuilder } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { HttpClientModule } from '@angular/common/http';
+import { CertificateVerificationData } from './certificate-verificationData-interface';
+import { Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-emission-verification',
@@ -20,24 +22,42 @@ export class EmissionVerificationComponent {
 
 
   verificationForm = this.formBuilder.group({
-    certificateNumber: [''],
-    carbonEmission : ['']
+    certificateNumber: ['', Validators.required],
+    carbonEmission : ['', Validators.required]
   })
 
   constructor(private formBuilder: FormBuilder, private http: HttpClient) {}
 
   onSubmit() {
     console.warn(this.verificationForm.value);
-    const payload = {
-      certificateNumber: this.verificationForm.value.certificateNumber,
-      carbonEmission: this.verificationForm.value.carbonEmission
+
+    if (this.verificationForm.invalid) {
+      this.verificationMessage = 'Please fill in all required fields.';
+      this.companyName = null;
+      this.buttonText = "Try Again";
+      return;
     }
 
-    this.http.post<any>('http://127.0.0.1:8000/api/v1/verify', payload).subscribe({
-      next: response =>{
+    const certificateNumber = String(this.verificationForm.value.certificateNumber);
+    const carbonEmission = Number(this.verificationForm.value.carbonEmission);
+
+    if (isNaN(carbonEmission)) {
+      this.verificationMessage = 'Please enter a number for the carbon emission.';
+      this.companyName = null;
+      this.buttonText = "Try Again";
+      return;
+    }
+
+    const payload: CertificateVerificationData = {
+      certificateNumber,
+      carbonEmission
+    }
+
+    this.http.post<CertificateVerificationData>('http://127.0.0.1:8000/api/v1/verify', payload).subscribe({
+      next: (response: CertificateVerificationData) =>{
         if (response.status === 'Verified') {
           this.verificationMessage = 'Verified';
-          this.companyName = response.companyName;
+          this.companyName = response.companyName!;
           this.buttonText = "Check Another Certificate";
         } else {
           this.verificationMessage = 'Not Verified';

@@ -82,10 +82,13 @@
     display: flex;
     flex-direction: column;
     width: 100%;
+    max-width: 300px;
     justify-content: center;
     align-items: center;
     font-family: 'Roboto Mono', monospace;
+    text-align: center;
     font-weight: 700;
+    color: #FF3838;
 }
 
 .verified{
@@ -99,3 +102,9 @@
 .verified p{
     color: black;
 }
+
+.required::after{
+    content:" *";
+    color: red;
+}
+
