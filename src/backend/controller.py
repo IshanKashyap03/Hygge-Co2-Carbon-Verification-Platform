@@ -1,20 +1,23 @@
 import certificate
+from logger import logger
 
 
+@logger.catch
 def verify_certificate(certificate_id: str, amount: float) -> dict:
     if amount < 0:
-        # TODO: Add logging
-        return {"status": "Error, amount must be positive"}
+        logger.warning("Amount must be positive")
+        return {"status": "warning, amount must be positive"}
 
     verification_hash = certificate.hash_data(certificate_id, str(amount))
-    print(verification_hash)
     if not certificate.verify_certificate(verification_hash):
+        logger.warning("Certificate not verified")
         return {"status": "Not Verified"}
 
     # TODO: Search database for name
     return {"status": "Verified", "companyName": "Satyam Steel"}
 
 
+@logger.catch
 def create_certificate(
     certificate_id: str,
     amount: float,
@@ -23,10 +26,10 @@ def create_certificate(
     company_name: str,
 ) -> None:
     if start_time > end_time:
-        # TODO: Add logging
+        logger.warning("Start time must be less than end time")
         return
     if amount < 0:
-        # TODO: Add logging
+        logger.warning("Start time must be less than end time")
         return
     verification_hash = certificate.hash_data(certificate_id, str(amount))
     computed_hash = certificate.hash_data(
@@ -38,6 +41,7 @@ def create_certificate(
 
 # Example usage
 def main():
+    logger.warning("Logger is in diagnose mode")
     certificate_id = "1"
     start_time = 1715836780
     end_time = 1715836780
@@ -45,9 +49,9 @@ def main():
     amount = float(100)
 
     # Create a certificate
-    create_certificate(certificate_id, amount, start_time, end_time, company_name)
-    print(verify_certificate(certificate_id, amount))
-    print(verify_certificate(certificate_id, amount // 2))
+    #    create_certificate(certificate_id, amount, start_time, end_time, company_name)
+    # print(verify_certificate(certificate_id, amount))
+    # print(verify_certificate(certificate_id, amount // 2))
 
 
 if __name__ == "__main__":

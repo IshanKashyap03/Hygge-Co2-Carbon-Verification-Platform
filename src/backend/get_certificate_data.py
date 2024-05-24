@@ -8,10 +8,12 @@ from config import (
     CERTIFICATE_DATA_BROKER_PASSWORD,
     CERTIFICATE_DATA_BROKER_TOPIC,
 )
+from logger import logger
 
 
 # Callback function when a message is received
 def on_message(client, userdata, message):
+    logger.info(f"Received message: {message.payload}")
     decoded_message = message.payload.decode()
     message_dict = json.loads(decoded_message)
 
@@ -30,10 +32,10 @@ def on_message(client, userdata, message):
 # Callback function when connecting to the broker
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
-        print("Connected to MQTT Broker!")
+        logger.info("Connected to MQTT Broker!")
         client.subscribe(CERTIFICATE_DATA_BROKER_TOPIC)
     else:
-        print(f"Failed to connect, return code {reason_code}")
+        logger.error(f"Failed to connect, return code {reason_code}")
 
 
 # Set up the MQTT client

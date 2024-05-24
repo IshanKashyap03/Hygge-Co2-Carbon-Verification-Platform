@@ -19,7 +19,6 @@ ENV_ACCOUNT_ADDRESS: ConstEnvAlias = os.getenv("ACCOUNT_ADDRESS")
 CONTRACT_ADDRESS: ConstEnvAlias = os.getenv("CONTRACT_ADDRESS")
 
 # Setup private key
-# TODO: Use vault
 __PRIVATE_KEY = os.getenv("PRIVATE_KEY")
 PRIVATE_KEY: Final[str] = (
     __PRIVATE_KEY
@@ -42,3 +41,6 @@ CERTIFICATE_DATA_BROKER_PASSWORD: Final[str] = extract_env_var(
 CERTIFICATE_DATA_BROKER_TOPIC: Final[str] = extract_env_var(
     "CERTIFICATE_DATA_BROKER_TOPIC"
 )
+
+# Logger details
+LOGGER_DIAGNOSE: Final[bool] = True  # TODO: Update to this to False when in production
