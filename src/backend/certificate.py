@@ -35,9 +35,13 @@ if not INFURA_URL:  # This means we are using the tester provider
     )
 
 
-def hash_data(*args: str) -> str:
+def hash_data(*args: str) -> bytes:
     logger.info("Hashing {args}", args=args)
-    return Web3.solidity_keccak(["string"] * len(args), args).hex()
+    return to_bytes(Web3.solidity_keccak(["string"] * len(args), args).hex())
+
+
+def to_bytes(hex_string: str) -> bytes:
+    return Web3.to_bytes(text=hex_string).ljust(32, b"\0")
 
 
 def create_contract(contract_address: str | None, deployer_address: str):
