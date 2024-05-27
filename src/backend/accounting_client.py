@@ -111,7 +111,8 @@ class CertificateDataClient:
         if self._validate_data("company_name", company_name):
             return
 
-        self.logger.info(
+        # TODO: Change this back to info and remove the return statement
+        self.logger.warning(
             "Received message: {certificate_id}, {amount}, {start_time}, {end_time}, {company_name}",
             certificate_id=certificate_id,
             amount=amount,
