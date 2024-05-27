@@ -1,3 +1,5 @@
+# TODO: Refactor this file to allow for multiple contracts to be deployed and used
+# TODO: Figure out why the contract is so expensive to deploy
 from web3 import Web3, EthereumTesterProvider
 from eth_tester import EthereumTester
 import json
@@ -68,21 +70,29 @@ def create_contract(contract_address: str | None, deployer_address: str):
         bytecode=contract_byte_code, abi=contract_abi
     )
     deployer_address = web3.to_checksum_address(deployer_address)
-    logger.info(f"{deployer_address = }")
+    logger.info(
+        "Deployer address:{deployer_address}", deployer_address=deployer_address
+    )
+
+    # Build the transaction
     tx = CertificateFactory.constructor().build_transaction(
         {
             "from": deployer_address,
             "nonce": web3.eth.get_transaction_count(deployer_address),
-            "gas": 2000000,  # TODO: For future, better estimate gas than use hardcoded value
-            "gasPrice": web3.to_wei("50", "gwei"),
+            "maxFeePerGas": web3.to_wei("2", "gwei"),
+            "maxPriorityFeePerGas": web3.to_wei("1", "gwei"),
         }
     )
+    gas = web3.eth.estimate_gas(tx)
+    tx["gas"] = gas
+
     # Sign the transaction
     signed_tx = web3.eth.account.sign_transaction(tx, private_key=PRIVATE_KEY)
 
     # Send the signed transaction
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
     receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+
     logger.info("Create contract {receipt}", receipt=receipt)
     deployed_addr = receipt["contractAddress"]
     logger.info("Contract deployed at {deployed_addr}", deployed_addr=deployed_addr)
@@ -97,20 +107,32 @@ def create_certificate(computed_hash: str, verification_hash: str):
     """
     Create a certificate on the blockchain
     """
+    # Fetch the current base fee from the latest block
+    latest_block = web3.eth.get_block("latest")
+    base_fee = latest_block["baseFeePerGas"]
+
+    # Set a reasonable max priority fee and max fee per gas
+    max_priority_fee = web3.to_wei("2", "gwei")
+    max_fee = base_fee + max_priority_fee
+
+    # Build transaction
     nonce = web3.eth.get_transaction_count(ACCOUNT_ADDRESS)
     txn = contract.functions.createCertificate(
         computed_hash, verification_hash
     ).build_transaction(
         {
             "from": ACCOUNT_ADDRESS,
-            "gas": 2000000,
-            "gasPrice": web3.to_wei("50", "gwei"),
             "nonce": nonce,
+            "maxFeePerGas": max_fee,
+            "maxPriorityFeePerGas": max_priority_fee,
         }
     )
+    gas = web3.eth.estimate_gas(txn)
+    txn["gas"] = gas
 
     signed_txn = web3.eth.account.sign_transaction(txn, PRIVATE_KEY)
     tx_hash = web3.eth.send_raw_transaction(signed_txn.rawTransaction)
+
     logger.info(f"Certificate creation transaction hash: {web3.to_hex(tx_hash)}")
     logger.info("Waiting for transaction to be mined...")
     logger.info(web3.eth.wait_for_transaction_receipt(tx_hash))

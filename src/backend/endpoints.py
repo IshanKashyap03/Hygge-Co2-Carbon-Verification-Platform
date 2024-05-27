@@ -3,23 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import time
 from pydantic import BaseModel
-from controller import verify_certificate
+from controller import verify_certificate, lifespan
 import uvicorn
 from logger import logger
-from contextlib import asynccontextmanager
-
-
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    logger.info("Application starting up")
-    # Add startup code after this line but before the yield
-
-    yield
-    # Add shutdown code after this line
-
-    logger.info("Application shutting down")
-    await logger.complete()
-    logger.remove()  # Clear existing sinks before shutdown to prevent semaphore leak
 
 
 app = FastAPI(lifespan=lifespan)

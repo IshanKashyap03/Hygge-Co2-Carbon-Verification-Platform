@@ -11,12 +11,12 @@ def extract_env_var(env_var: str) -> str:
 
 
 load_dotenv()
-ConstEnvAlias = Final[Optional[str]]
+ConstEnvVariable = Final[Optional[str]]
 
 # Basic environment variables
-INFURA_URL: ConstEnvAlias = os.getenv("INFURA_URL")
-ENV_ACCOUNT_ADDRESS: ConstEnvAlias = os.getenv("ACCOUNT_ADDRESS")
-CONTRACT_ADDRESS: ConstEnvAlias = os.getenv("CONTRACT_ADDRESS")
+INFURA_URL: ConstEnvVariable = os.getenv("INFURA_URL")
+ENV_ACCOUNT_ADDRESS: ConstEnvVariable = os.getenv("ACCOUNT_ADDRESS")
+CONTRACT_ADDRESS: ConstEnvVariable = os.getenv("CONTRACT_ADDRESS")
 
 # Setup private key
 __PRIVATE_KEY = os.getenv("PRIVATE_KEY")
