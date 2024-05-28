@@ -38,12 +38,7 @@ if not INFURA_URL:  # This means we are using the tester provider
 
 
 def hash_data(*args: str) -> bytes:
-    logger.info("Hashing {args}", args=args)
-    return to_bytes(Web3.solidity_keccak(["string"] * len(args), args).hex())
-
-
-def to_bytes(hex_string: str) -> bytes:
-    return Web3.to_bytes(text=hex_string).ljust(32, b"\0")
+    return bytes(Web3.solidity_keccak(["string"] * len(args), args))
 
 
 def create_contract(contract_address: str | None, deployer_address: str):
@@ -103,7 +98,7 @@ def create_contract(contract_address: str | None, deployer_address: str):
 contract = create_contract(CONTRACT_ADDRESS, ACCOUNT_ADDRESS)
 
 
-def create_certificate(computed_hash: str, verification_hash: str):
+def create_certificate(computed_hash: bytes, verification_hash: bytes):
     """
     Create a certificate on the blockchain
     """
@@ -131,7 +126,12 @@ def create_certificate(computed_hash: str, verification_hash: str):
     txn["gas"] = gas
 
     signed_txn = web3.eth.account.sign_transaction(txn, PRIVATE_KEY)
-    tx_hash = web3.eth.send_raw_transaction(signed_txn.rawTransaction)
+    try:
+        get_raw_transaction = signed_txn.rawTransaction
+    except AttributeError:
+        get_raw_transaction = signed_txn.raw_transaction
+
+    tx_hash = web3.eth.send_raw_transaction(get_raw_transaction)
 
     logger.info(f"Certificate creation transaction hash: {web3.to_hex(tx_hash)}")
     logger.info("Waiting for transaction to be mined...")
