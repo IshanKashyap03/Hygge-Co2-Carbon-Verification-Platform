@@ -45,7 +45,7 @@ class Certificate(BaseModel):
     )  # Wouldn't the company name be linked to the account?
     start_date = sql.DateTimeField(null=False)
     end_date = sql.DateTimeField(null=False)
-    total_emission = sql.DecimalField(null=False, decimal_places=4, max_digits=11)
+    total_emission = sql.DecimalField(null=False, decimal_places=4, max_digits=12)
     issue_date = sql.DateTimeField(null=False)
 
     created_date = sql.DateTimeField(null=False)
@@ -65,7 +65,7 @@ class CertificateVerificationAttempt(BaseModel):
         backref="certificate_verification_attempts",
         field="certificate_number",
     )
-    total_emission = sql.DecimalField(null=False, decimal_places=4, max_digits=11)
+    total_emission = sql.DecimalField(null=False, decimal_places=4, max_digits=12)
     verified_time = sql.DateTimeField(null=False)
     success = sql.BooleanField(null=False)
 

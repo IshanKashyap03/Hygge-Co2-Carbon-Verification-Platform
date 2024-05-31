@@ -11,7 +11,7 @@ To run the application, navigate to the root directory of the project and run th
 docker-compose up
 ```
 
-The application should now be visible on localhost:4000
+The application should now be visible on `http://localhost:4000/`.
 
 ### Stopping the application
 
@@ -22,24 +22,12 @@ docker-compose down
 
 ### Use data
 
-The application doesn't have any data when starting up. You must 
+The application doesn't have any data when starting up. You must run the following from the root of the project directory:
 ```bash
 docker ps # to get the container id of the db
 CONTAINER_ID=<container_id> 
-docker cp database<date>.dump $CONTAINER_ID:/your_database.dump # to copy the dump file to the container
-docker exec -it $CONTAINER_ID psql -U <your_username> -d <your_database> # to access the database
-```
-Inside the database, you will need to drop the tables and restore the dump file. To do that, run the following commands:
-```sql
-DROP TABLE IF EXISTS "certificate";
-DROP TABLE IF EXISTS "user";
-DROP TABLE IF EXISTS "certificateverificationattempt";
-<ctrl+d> # to exit the database
-```
-
-Inside your command line, run the following command:
-```bash
-docker exec -it $CONTAINER_ID pg_restore -U <your_username> -d <your_database> /your_database.dump
+docker cp src/backend/db_data.sql $CONTAINER_ID:/your_database.dump # to copy the dump file to the container
+docker exec -it $CONTAINER_ID psql -U <your_username> -d <your_database> -f /your_database.dump # to restore the dump file
 ```
 
 ## Angular Local Development
