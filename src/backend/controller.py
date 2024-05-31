@@ -2,6 +2,9 @@ from contextlib import asynccontextmanager
 import certificate
 from accounting_client import CertificateDataClient
 from logger import logger, logger_close
+from datetime import datetime
+import models
+from utils import start_end_datetime_to_str
 
 
 @asynccontextmanager
@@ -12,6 +15,7 @@ async def lifespan(_):
     """
     logger.info("Application starting up")
     # Add startup code after this line but before the yield
+    models.database_setup()
     client = CertificateDataClient(create_certificate, logger)
     client.start()
 
@@ -26,56 +30,106 @@ async def lifespan(_):
 
 @logger.catch
 def verify_certificate(certificate_id: str, amount: float) -> dict:
+    if not models.does_certificate_exist(certificate_id):
+        logger.warning("Certificate does not exist")
+        return {"status": "Not Verified"}
+
     if amount < 0:
-        logger.warning("Amount must be positive")
-        return {"status": "warning, amount must be positive"}
+        logger.warning("Amount can't be negative")
+        models.certificate_verification_attempt_create(certificate_id, amount, False)
+        return {"status": "Warning, amount can't be negative"}
 
     verification_hash = certificate.hash_data(certificate_id, str(amount))
     if not certificate.verify_certificate(verification_hash):
         logger.warning("Certificate not verified")
+        models.certificate_verification_attempt_create(certificate_id, amount, False)
         return {"status": "Not Verified"}
 
-    # TODO: Search database for name
-    return {"status": "Verified", "companyName": "Satyam Steel"}
+    models.certificate_verification_attempt_create(certificate_id, amount, True)
+    certificate_date = models.certificate_get_data(certificate_id)
+    return {
+        "status": "Verified",
+        "companyName": certificate_date["factory_name"],
+        "startDate": start_end_datetime_to_str(certificate_date["start_date"]),
+        "endDate": start_end_datetime_to_str(certificate_date["end_date"]),
+    }
 
 
 @logger.catch
 def create_certificate(
     certificate_id: str,
     amount: float,
-    start_time: int,
-    end_time: int,
+    start_time: datetime,
+    end_time: datetime,
     company_name: str,
+    issue_date: datetime,
+    user_id: str,
 ) -> None:
     if start_time > end_time:
         logger.warning("Start time must be less than end time")
         return
     if amount < 0:
-        logger.warning("Start time must be less than end time")
+        logger.warning("Amount can't be negative")
         return
+    # Create user if not present
+    models.user_create(user_id)
+
+    # Add data from certificate to the database
+    models.certificate_create(
+        certificate_id, amount, start_time, end_time, company_name, issue_date, user_id
+    )
+
+    # Hash the data needed for certificate
     verification_hash = certificate.hash_data(certificate_id, str(amount))
     computed_hash = certificate.hash_data(
         str(certificate_id), str(amount), str(start_time), str(end_time), company_name
     )
-    # TODO: Add logging for the transaction
-    certificate.create_certificate(computed_hash, verification_hash)
 
+    models.certificate_set_transaction_status(
+        certificate_id, models.TransactionStatus.IN_PROGRESS
+    )
 
-# Example usage
-# TODO: Remove this or replace with actual usage
-def main():
-    print("Creating certificate")
-    certificate_id = "cert-ca-1399"
-    start_time = 1715836780
-    end_time = 1715836780
-    company_name = "Satyam Steel"
-    amount = 171.933
+    # Attempt to create a certificate on the blockchain
+    transaction = None
+    try:
+        transaction = certificate.create_certificate(computed_hash, verification_hash)
+    except Exception as e:
+        logger.error("Error creating certificate: {exception}", exception=e)
+        models.certificate_set_transaction_status(
+            certificate_id, models.TransactionStatus.FAILED
+        )
+        return
 
-    # Create a certificate
-    create_certificate(certificate_id, amount, start_time, end_time, company_name)
-    print(verify_certificate(certificate_id, amount))
-    print(verify_certificate(certificate_id, amount // 2))
+    # Unknown error
+    if transaction is None:
+        logger.error(
+            "Error creating certificate: {transaction}", transaction=transaction
+        )
+        models.certificate_set_transaction_status(
+            certificate_id, models.TransactionStatus.FAILED
+        )
+        return
 
+    # Transaction was reverted by EVM
+    if transaction["status"] != certificate.ETHEREUM_TRANSACTION_SUCCESS:
+        logger.error(
+            "Error creating certificate: {transaction}", transaction=transaction
+        )
+        models.certificate_set_transaction_status(
+            certificate_id,
+            models.TransactionStatus.REVERTED,
+        )
+        return
 
-if __name__ == "__main__":
-    main()
+    # Based on the version of Python not the package it uses different attribute names
+    try:
+        transaction_hash = transaction["transactionHash"]
+    except KeyError:
+        transaction_hash = transaction["transaction_hash"]
+
+    # Add transaction details to the database as was successful
+    models.certificate_add_transaction(
+        certificate_id,
+        transaction_hash.hex(),
+        datetime.now(),
+    )

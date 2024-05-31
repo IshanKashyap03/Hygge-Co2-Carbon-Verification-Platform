@@ -9,7 +9,7 @@ from config import (
     CERTIFICATE_DATA_BROKER_PASSWORD,
     CERTIFICATE_DATA_BROKER_TOPIC,
 )
-from utils import is_float
+from utils import is_float, issue_date_to_datetime, start_end_date_to_datetime
 
 PAHO_LOG_LEVELS = {
     mqtt.MQTT_LOG_INFO: "INFO",
@@ -100,29 +100,54 @@ class CertificateDataClient:
             return
 
         start_time = message_dict.get("start_date")
-        if self._validate_data("start_date", start_time):
+        try:
+            start_time = start_end_date_to_datetime(start_time)
+        except ValueError:
+            self.logger.critical("start_date is not in the correct format")
             return
 
         end_time = message_dict.get("end_date")
-        if self._validate_data("end_date", end_time):
+        try:
+            end_time = start_end_date_to_datetime(end_time)
+        except ValueError:
+            self.logger.critical("end_date is not in the correct format")
             return
 
         company_name = message_dict.get("company_name")
         if self._validate_data("company_name", company_name):
             return
 
+        user_id = message_dict.get("user_id")
+        if self._validate_data("user_id", user_id):
+            return
+
+        issue_date = message_dict.get("issue_date")
+        try:
+            issue_date = issue_date_to_datetime(issue_date)
+        except ValueError:
+            self.logger.critical("issue_date is not in the correct format")
+            return
+
         # TODO: Change this back to info and remove the return statement
         self.logger.warning(
-            "Received message: {certificate_id}, {amount}, {start_time}, {end_time}, {company_name}",
+            "Received message: {certificate_id}, {amount}, {start_time}, {end_time}, {company_name}, {user_id}, {issue_date}",
             certificate_id=certificate_id,
             amount=amount,
             start_time=start_time,
             end_time=end_time,
             company_name=company_name,
+            user_id=user_id,
+            issue_date=issue_date,
         )
 
         self.data_process_callback(
-            certificate_id, float(amount), start_time, end_time, company_name
+            certificate_id,
+            float(amount),
+            start_time,
+            end_time,
+            company_name,
+            issue_date,
+            user_id,
         )
 
     def _on_connect(self, client, userdata, flags, reason_code, properties) -> None:

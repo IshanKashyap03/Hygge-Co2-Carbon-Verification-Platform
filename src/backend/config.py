@@ -48,3 +48,5 @@ LOGGER_DIAGNOSE: Final[bool] = True  # TODO: Update to this to False when in pro
 # database details
 DATABASE_NAME: ConstEnvVariable = os.getenv("DATABASE_NAME")
 DATABASE_USER: ConstEnvVariable = os.getenv("DATABASE_USER")
+DATABASE_PASSWORD: ConstEnvVariable = os.getenv("DATABASE_PASSWORD")
+DATABASE_HOST: ConstEnvVariable = os.getenv("DATABASE_HOST", "localhost")

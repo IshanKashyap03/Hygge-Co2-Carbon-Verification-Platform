@@ -6,6 +6,7 @@ import json
 from config import INFURA_URL, PRIVATE_KEY, ENV_ACCOUNT_ADDRESS, CONTRACT_ADDRESS
 from logger import logger
 
+ETHEREUM_TRANSACTION_SUCCESS = 1
 
 # Connect to Ethereum node using Infura
 provider = Web3.HTTPProvider(INFURA_URL) if INFURA_URL else EthereumTesterProvider()
@@ -126,6 +127,8 @@ def create_certificate(computed_hash: bytes, verification_hash: bytes):
     txn["gas"] = gas
 
     signed_txn = web3.eth.account.sign_transaction(txn, PRIVATE_KEY)
+
+    # Based on the version of Python not the package it uses different attribute names
     try:
         get_raw_transaction = signed_txn.rawTransaction
     except AttributeError:
@@ -135,11 +138,12 @@ def create_certificate(computed_hash: bytes, verification_hash: bytes):
 
     logger.info(f"Certificate creation transaction hash: {web3.to_hex(tx_hash)}")
     logger.info("Waiting for transaction to be mined...")
-    logger.info(web3.eth.wait_for_transaction_receipt(tx_hash))
-    return web3.eth.get_transaction(tx_hash)
+    receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+    logger.info("Certificate creation transaction receipt: {receipt}", receipt=receipt)
+    return receipt
 
 
-def verify_certificate(verification_hash: str) -> bool:
+def verify_certificate(verification_hash: bytes) -> bool:
     logger.info(
         "Verifying certificates using verification_hash={verification_hash}",
         verification_hash=verification_hash,

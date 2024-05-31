@@ -17,23 +17,31 @@ import { Validators } from '@angular/forms';
 export class EmissionVerificationComponent {
 
   companyName: string | null = null;
+  startDate: string | null = null;
+  endDate: string | null = null;
   verificationMessage: string | null = null;
-  buttonText : string = "Verify";
+  buttonText: string = "Verify";
 
 
   verificationForm = this.formBuilder.group({
     certificateNumber: ['', Validators.required],
-    carbonEmission : ['', Validators.required]
+    carbonEmission: ['', Validators.required]
   })
 
-  constructor(private formBuilder: FormBuilder, private http: HttpClient) {}
+  constructor(private formBuilder: FormBuilder, private http: HttpClient) { }
+
+  resetResponseProperties() {
+    this.companyName = null;
+    this.startDate = null;
+    this.endDate = null;
+  }
 
   onSubmit() {
     console.warn(this.verificationForm.value);
 
     if (this.verificationForm.invalid) {
       this.verificationMessage = 'Please fill in all required fields.';
-      this.companyName = null;
+      this.resetResponseProperties();
       this.buttonText = "Try Again";
       return;
     }
@@ -43,7 +51,7 @@ export class EmissionVerificationComponent {
 
     if (isNaN(carbonEmission)) {
       this.verificationMessage = 'Please enter a number for the carbon emission.';
-      this.companyName = null;
+      this.resetResponseProperties();
       this.buttonText = "Try Again";
       return;
     }
@@ -54,21 +62,23 @@ export class EmissionVerificationComponent {
     }
 
     this.http.post<CertificateVerificationData>('http://127.0.0.1:8000/api/v1/verify', payload).subscribe({
-      next: (response: CertificateVerificationData) =>{
+      next: (response: CertificateVerificationData) => {
         if (response.status === 'Verified') {
           this.verificationMessage = 'Verified';
           this.companyName = response.companyName!;
+          this.startDate = response.startDate!;
+          this.endDate = response.endDate!;
           this.buttonText = "Check Another Certificate";
         } else {
           this.verificationMessage = 'Not Verified';
-          this.companyName = null;
+          this.resetResponseProperties();
           this.buttonText = "Try Again";
         }
-      }, 
+      },
       error: error => {
         console.error('Error verifying certificate:', error);
         this.verificationMessage = 'An Error Occured';
-        this.companyName = null;
+        this.resetResponseProperties();
         this.buttonText = "Try Again";
       }
     })

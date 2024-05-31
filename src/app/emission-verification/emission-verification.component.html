@@ -14,12 +14,16 @@
 
         <div *ngIf="verificationMessage !== null" [ngClass]="{'verification-message': true, 'verified': verificationMessage === 'Verified', 'not-verified': verificationMessage === 'Not Verified'}">
             <h3>{{ verificationMessage }}</h3>
-            <p *ngIf="verificationMessage === 'Verified'">Company Name: {{ companyName }}</p>
-        </div>  
+            <p *ngIf="verificationMessage === 'Verified'">
+            Company Name: {{ companyName }} <br>
+            Start Date: {{ startDate }} <br>
+            End Date: {{ endDate }} <br>
+            </p>
+        </div>
 
         <div class="verify-button">
             <button type="submit">{{buttonText}}</button>
-        </div>      
+        </div>
     </form>
 </div>
 
