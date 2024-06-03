@@ -114,7 +114,7 @@ def create_certificate(computed_hash: bytes, verification_hash: bytes):
     # Build transaction
     nonce = web3.eth.get_transaction_count(ACCOUNT_ADDRESS)
     txn = contract.functions.createCertificate(
-        computed_hash, verification_hash
+        (computed_hash), (verification_hash)
     ).build_transaction(
         {
             "from": ACCOUNT_ADDRESS,

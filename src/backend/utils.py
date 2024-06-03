@@ -23,6 +23,10 @@ def start_end_datetime_to_str(date: datetime) -> str:
     return date.strftime("%B %d, %Y %H:%M")
 
 
+def start_end_datetime_to_str(date: datetime) -> str:
+    return date.strftime("%B %d, %Y %H:%M")
+
+
 def main():
     # TODO: Add proper testing framework (Pytest)
     issue_date = "2024-05-28T17:41:58.300626"
