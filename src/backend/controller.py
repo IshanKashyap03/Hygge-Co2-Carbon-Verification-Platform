@@ -1,10 +1,16 @@
-from contextlib import asynccontextmanager
 import certificate
 from accounting_client import CertificateDataClient
 from logger import logger, logger_close
 from datetime import datetime
 import models
-from utils import start_end_datetime_to_str
+from utils import (
+    start_end_datetime_to_str,
+    start_end_date_to_datetime,
+    issue_date_to_datetime,
+)
+
+from typing import Callable, Any
+from contextlib import asynccontextmanager
 
 
 @asynccontextmanager
@@ -72,6 +78,15 @@ def create_certificate(
     if amount < 0:
         logger.warning("Amount can't be negative")
         return
+
+    # Certificate ids must be unique in the database
+    if models.does_certificate_exist(certificate_id):
+        logger.warning(
+            "Certificate with {certificate_id} already exists in the database",
+            certificate_id=certificate_id,
+        )
+        return
+
     # Create user if not present
     models.user_create(user_id)
 
@@ -134,3 +149,65 @@ def create_certificate(
         transaction_hash.hex(),
         datetime.now(),
     )
+
+
+def get_data_from_user(prompt: str, convert: Callable[[str], Any]) -> Any:
+    while True:
+        raw_data = input(prompt)
+        try:
+            data = convert(raw_data)
+            return data
+        except ValueError:
+            print(f"Raw data: {raw_data} can't be converted")
+
+
+def main():
+    while input("Do you want to add a certificate to the backend (y/n): ") == "y":
+        # Get user data
+        certificate_id = input("Enter certificate id: ")
+        if models.does_certificate_exist(certificate_id):
+            print(
+                f"Certificate {certificate_id} already exists. Exiting",
+            )
+            continue
+        company_name = input("Enter company name: ")
+        start_date: datetime = get_data_from_user(
+            "Enter start date: ", start_end_date_to_datetime
+        )
+        end_date: datetime = get_data_from_user(
+            "Enter end date: ", start_end_date_to_datetime
+        )
+        total_emissions: float = get_data_from_user(
+            "Enter total CO2 emissisons: ", float
+        )
+        issue_date: datetime = get_data_from_user(
+            "Enter issue date: ", issue_date_to_datetime
+        )
+        user_id = input("Enter user id: ")
+        transaction_hash = input("Enter transaction hash: ")
+
+        # Verify and create
+        verificatation_hash = certificate.hash_data(
+            certificate_id, str(total_emissions)
+        )
+        if not certificate.verify_certificate(verificatation_hash):
+            print("Certificate doesn't exists on the chain. You must create it")
+            continue
+        models.user_create(user_id)
+        models.certificate_create(
+            certificate_id,
+            total_emissions,
+            start_date,
+            end_date,
+            company_name,
+            issue_date,
+            user_id,
+        )
+        models.certificate_add_transaction(
+            certificate_id, transaction_hash, datetime.now()
+        )
+        print(f"Successful added certificate {certificate_id}")
+
+
+if __name__ == "__main__":
+    main()
