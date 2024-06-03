@@ -28,6 +28,7 @@ async def lifespan(_):
     await logger_close()
 
 
+
 @logger.catch
 def verify_certificate(certificate_id: str, amount: float) -> dict:
     if not models.does_certificate_exist(certificate_id):
