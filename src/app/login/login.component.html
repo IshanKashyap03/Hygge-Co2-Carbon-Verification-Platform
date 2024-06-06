@@ -1,0 +1,39 @@
+<header class="toolbar">
+    <img class="toolbar__logo" src="assets/images/hygge-logo.png">
+    <p class="toolbar_text">Hygge Verification Portal Login</p>
+  </header>
+  <div disabled *ngIf="!otp_requested" class="login__screen">
+    <img src="assets/images/logo_with_text.png">
+    <div class="login__form-container">
+      <h4  id="login__title">Log in</h4>
+      <form  [formGroup]="reactiveForm">
+        <h4 id="login__enter-mobile-header">Enter your Mobile number</h4>
+        <input type="text" id="login__enter-mobile-input" formControlName="phone_number" name="phone_number"
+          placeholder="Enter your mobile number" class="full-width-input spaced-input" required
+          autocomplete="new-password" maxLength="{{maxPhoneDigits}}" appOnlyNumber />
+      </form>
+      <button (click)="onPhoneNumberSubmit()" [disabled]="is_loading || !get_phone_number?.valid"
+      class="login__get-otp-button">Get OTP</button>
+      <label *ngIf="!is_authorized" class="unauthorized">Phone number is not authorized</label>
+      <label *ngIf="max_attempts_reached" class="unauthorized">Reached max verification attempts</label>
+      <label *ngIf="unexpected_error" class="unauthorized">Unexpected error please try later</label>
+    </div>
+  </div>
+  <div *ngIf="otp_requested && is_authorized" class=login__screen>
+    <img src="assets/images/logo_with_text.png">
+    <div class="login__form-container">
+      <h4 id="login__title">Verification Code</h4>
+      <form [formGroup]="reactiveForm" (ngSubmit)="onOtpSubmit()">
+        <h4 id="login__enter-otp-header">Enter OTP</h4>
+        <label>Enter 6-digit verification code sent to your mobile number.</label>
+        <div id="otp-inputs">
+          <input #otpInput *ngFor="let otpPart of otpParts; let i = index; let isFirst = first; let isLast = last"
+                 type="text" [id]="otpPart" class="otp-input" [name]="otpPart" placeholder="" min="0" max="9" required
+                 [formControlName]="otpPart" autocomplete="new-password" maxLength="1" appOnlyNumber
+                 (keyup)="onOtpInputKeyUp($event, isLast ? -1 : i+1, isFirst ? -1 : i-1)" />
+        </div>
+      </form>
+      <button (click)="onOtpSubmit()" [disabled]="is_loading || !reactiveForm.valid" class="login__get-otp-button">Log in</button>
+      <label *ngIf="otp_error" class="unauthorized">Invalid OTP</label>
+    </div>
+  </div>

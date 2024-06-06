@@ -4,7 +4,7 @@ import { FormBuilder } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { HttpClientModule } from '@angular/common/http';
-import { CertificateVerificationData } from './certificate-verificationData-interface';
+import { CertificateVerificationData } from '../interfaces/responses/models';
 import { Validators } from '@angular/forms';
 
 @Component({

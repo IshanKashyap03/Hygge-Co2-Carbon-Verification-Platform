@@ -1,0 +1,42 @@
+.logout {
+    position: fixed;
+    top: 10px;
+    right: 0;
+  }
+
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #f9f9f9;
+    min-width: 80px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    padding: 12px 16px;
+    z-index: 1;
+    cursor: pointer;
+  }
+
+  .dropdown:hover .dropdown-content {
+    display: block;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+  }
+  span{
+    margin-right: 4px;
+  }
+.hygge-logo img{
+    height: 30px;
+}
+
+.profile-logo img{
+    height: 30px;
+    margin-right: 10px;
+}

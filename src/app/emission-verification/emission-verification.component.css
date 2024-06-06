@@ -1,8 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
 .emission-verification-card {
     display: flex;
     flex-direction: column;
     margin: 80px auto;
-    padding: 0; 
+    padding: 0;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     max-width: 500px;
@@ -14,7 +16,7 @@
 .title{
     background-color: #598D9C;
     color: #FAFAFA;
-    border-radius: 8px; 
+    border-radius: 8px;
     padding: 20px 0px;
     text-align: center;
     font-family: 'Roboto Slab';
@@ -43,7 +45,7 @@
     color: #116881;
     max-width: 300px;
     word-wrap: break-word;
-    text-align: center; 
+    text-align: center;
     font-size: 16px;
     font-family: 'Roboto Slab';
 }
