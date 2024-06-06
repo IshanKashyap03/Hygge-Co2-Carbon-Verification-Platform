@@ -45,8 +45,12 @@ CERTIFICATE_DATA_BROKER_TOPIC: Final[str] = extract_env_var(
 # Logger details
 LOGGER_DIAGNOSE: Final[bool] = True  # TODO: Update to this to False when in production
 
-# database details
-DATABASE_NAME: ConstEnvVariable = os.getenv("DATABASE_NAME")
-DATABASE_USER: ConstEnvVariable = os.getenv("DATABASE_USER")
-DATABASE_PASSWORD: ConstEnvVariable = os.getenv("DATABASE_PASSWORD")
-DATABASE_HOST: ConstEnvVariable = os.getenv("DATABASE_HOST", "localhost")
+# Database details
+DATABASE_NAME: Final[str] = extract_env_var("DATABASE_NAME")
+DATABASE_USER: Final[str] = extract_env_var("DATABASE_USER")
+DATABASE_PASSWORD: Final[str] = extract_env_var("DATABASE_PASSWORD")
+DATABASE_HOST: Final[str] = os.getenv("DATABASE_HOST", "localhost")
+
+# JWT details
+JWT_SECRET_KEY: Final[str] = extract_env_var("SECRET_KEY")
+JWT_ALGORITHM: Final[str] = extract_env_var("ALGORITHM")

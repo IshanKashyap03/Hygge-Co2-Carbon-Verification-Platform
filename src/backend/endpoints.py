@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 import time
@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from controller import verify_certificate, lifespan
 import uvicorn
 from logger import logger
+from auth import get_current_user
 
 
 app = FastAPI(lifespan=lifespan)
@@ -17,7 +18,7 @@ class CertificateData(BaseModel):
 
 
 @app.post("/api/v1/verify")
-async def verify(data: CertificateData):
+async def verify(data: CertificateData, _: dict = Depends(get_current_user)):
     logger.info(data)
     if data.carbonEmission < 0:
         logger.warning("Total emissions is negative")

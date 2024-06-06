@@ -25,6 +25,10 @@
     display: block;
   }
 
+  .dropdown-content a{
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+  }
+
   .user-info {
     display: flex;
     align-items: center;
