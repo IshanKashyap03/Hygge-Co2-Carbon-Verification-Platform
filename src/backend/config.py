@@ -50,6 +50,7 @@ DATABASE_NAME: Final[str] = extract_env_var("DATABASE_NAME")
 DATABASE_USER: Final[str] = extract_env_var("DATABASE_USER")
 DATABASE_PASSWORD: Final[str] = extract_env_var("DATABASE_PASSWORD")
 DATABASE_HOST: Final[str] = os.getenv("DATABASE_HOST", "localhost")
+DATABASE_PORT: Final[int] = int(extract_env_var("DATABASE_PORT"))
 
 # JWT details
 JWT_SECRET_KEY: Final[str] = extract_env_var("SECRET_KEY")

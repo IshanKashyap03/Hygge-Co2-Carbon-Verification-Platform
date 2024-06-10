@@ -2,7 +2,7 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install PostgreSQL client and development libraries
+# Install PostgreSQL client and development libraries (so we can use psql)
 RUN apt-get update && \
     apt-get install -y libpq-dev gcc postgresql-client && \
     apt-get clean
@@ -15,5 +15,5 @@ COPY src/contract /contract
 
 COPY src/backend .
 
-CMD ["./wait-for-postgres.sh", "db", "uvicorn", "endpoints:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["./wait-for-postgres.sh", "db", "uvicorn", "endpoints:app", "--host", "0.0.0.0", "--port", "7090"]
 

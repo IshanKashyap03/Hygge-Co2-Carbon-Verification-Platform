@@ -1,5 +1,16 @@
 # HyggeCo2CertificateVerificationPortal
 
+## For Deployment
+
+### Frontend Build
+
+Build the project using this command: `ng build --base-href /hcevp/ --configuration=production`
+
+### Frontend Deployment
+
+You should setup a .ssh config for the hygge test network before deploying.
+Copy the contents of the `dist` folder to the server. `scp -r dist hygge:~/codebc/co2-bc`
+
 ## Using Docker
 
 Make sure to have Docker and docker compose installed on your machine. You can download it from [here](https://www.docker.com/products/docker-desktop).
@@ -11,7 +22,7 @@ To run the application, navigate to the root directory of the project and run th
 docker-compose up
 ```
 
-The application should now be visible on `http://localhost:4000/`.
+The application should now be visible on `http://localhost:8080/`.
 
 ### Stopping the application
 

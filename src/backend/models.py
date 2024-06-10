@@ -1,11 +1,21 @@
 import peewee as sql
 from datetime import datetime
-from config import DATABASE_HOST, DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD
+from config import (
+    DATABASE_HOST,
+    DATABASE_NAME,
+    DATABASE_USER,
+    DATABASE_PASSWORD,
+    DATABASE_PORT,
+)
 import enum
 from copy import deepcopy
 
 psql_db = sql.PostgresqlDatabase(
-    DATABASE_NAME, user=DATABASE_USER, password=DATABASE_PASSWORD, host=DATABASE_HOST
+    DATABASE_NAME,
+    user=DATABASE_USER,
+    password=DATABASE_PASSWORD,
+    host=DATABASE_HOST,
+    port=DATABASE_PORT,
 )
 
 

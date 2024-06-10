@@ -2,13 +2,13 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     depends_on:
       - backend
     networks:
       - my-network
     ports:
-      - "4000:4000"
+      - "8080:8080"
 
   backend:
     build:
@@ -17,7 +17,7 @@ services:
     env_file:
       - .env
     ports:
-      - "8000:8000"
+      - "7090:7090"
     depends_on:
       - db
     environment:
@@ -39,9 +39,10 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
     networks:
       - my-network
+    command: -p ${DATABASE_PORT}
 
 volumes:
   postgres_data:

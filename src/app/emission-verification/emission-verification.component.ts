@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { HttpClientModule } from '@angular/common/http';
 import { CertificateVerificationData } from '../interfaces/responses/models';
 import { Validators } from '@angular/forms';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-emission-verification',
@@ -61,7 +62,7 @@ export class EmissionVerificationComponent {
       carbonEmission
     }
 
-    this.http.post<CertificateVerificationData>('http://127.0.0.1:8000/api/v1/verify', payload).subscribe({
+    this.http.post<CertificateVerificationData>(environment.hcevpApiUrl, payload).subscribe({
       next: (response: CertificateVerificationData) => {
         if (response.status === 'Verified') {
           this.verificationMessage = 'Verified';

@@ -17,7 +17,7 @@ class CertificateData(BaseModel):
     carbonEmission: float
 
 
-@app.post("/api/v1/verify")
+@app.post("/hcevp-api/v1/verify")
 async def verify(data: CertificateData, _: dict = Depends(get_current_user)):
     logger.info(data)
     if data.carbonEmission < 0:
@@ -30,7 +30,11 @@ async def verify(data: CertificateData, _: dict = Depends(get_current_user)):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200", "http://localhost:4000"],
+    allow_origins=[
+        "http://localhost:4200",
+        "http://localhost:8080",
+        "https://hygge-test.ddns.net:8080",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -52,4 +56,4 @@ async def log_middleware(request: Request, call_next):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run(app, host="127.0.0.1", port=7090, reload=True)

@@ -1,17 +1,17 @@
-# Stage 1: Build the Angular app
-FROM node:20 AS build
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm install
-COPY . .
-RUN npm run build
+# Used for deployment only
+FROM python:3.10-slim
 
-# Stage 2: Serve the Angular app with Node.js
-FROM node:20-alpine
 WORKDIR /app
-COPY --from=build /app/dist/hygge-co2-certificate-verification-portal /app/dist/hygge-co2-certificate-verification-portal
-COPY package.json package-lock.json ./
-RUN npm install --only=production
 
-EXPOSE 4000
-CMD ["npm", "run", "serve:ssr:hygge-co2-certificate-verification-portal"]
+COPY ./requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY .env .
+
+RUN mkdir /contract
+COPY src/contract /contract
+
+COPY src/backend .
+
+CMD ["uvicorn", "endpoints:app", "--host", "0.0.0.0", "--port", "7090"]
+
