@@ -1,6 +1,5 @@
 # TODO: Refactor this file to allow for multiple contracts to be deployed and used
-# TODO: Refactor to remove globals
-from eth_typing import ChecksumAddress
+# TODO: Figure out why the contract is so expensive to deploy
 from web3 import Web3, EthereumTesterProvider
 from eth_tester import EthereumTester
 import json
@@ -9,47 +8,34 @@ from logger import logger
 
 ETHEREUM_TRANSACTION_SUCCESS = 1
 
-# Module variables
-web3: Web3 | None = None
-contract = None
-ACCOUNT_ADDRESS: ChecksumAddress | None = None
+# Connect to Ethereum node using Infura
+provider = Web3.HTTPProvider(INFURA_URL) if INFURA_URL else EthereumTesterProvider()
+web3 = Web3(provider)
+tester = EthereumTester()
+
+# Check connection
+if not web3.is_connected():
+    logger.critical("Failed to connect to Ethereum")
+    raise Exception("Failed to connect to Ethereum")
 
 
-def setup_certificate_module():
-    global web3, contract, ACCOUNT_ADDRESS
-    assert web3 is None, "Module already initialized"
-
-    # Connect to Ethereum node using Infura
-    provider = Web3.HTTPProvider(INFURA_URL) if INFURA_URL else EthereumTesterProvider()
-    web3 = Web3(provider)
-    tester = EthereumTester()
-
-    # Check connection
-    if not web3.is_connected():
-        logger.critical("Failed to connect to Ethereum")
-        raise Exception("Failed to connect to Ethereum")
-
-    # Set account
-    ACCOUNT_ADDRESS = (
-        web3.to_checksum_address(ENV_ACCOUNT_ADDRESS)
-        if ENV_ACCOUNT_ADDRESS
-        else tester.add_account(PRIVATE_KEY)
+# Set account
+ACCOUNT_ADDRESS = (
+    web3.to_checksum_address(ENV_ACCOUNT_ADDRESS)
+    if ENV_ACCOUNT_ADDRESS
+    else tester.add_account(PRIVATE_KEY)
+)
+logger.info(f"{ACCOUNT_ADDRESS = }")
+if not INFURA_URL:  # This means we are using the tester provider
+    logger.info("Sending 1 ether to the account for testing purposes")
+    account1 = tester.get_accounts()[0]
+    txn = web3.eth.send_transaction(
+        {
+            "from": account1,
+            "to": ACCOUNT_ADDRESS,
+            "value": web3.to_wei(1, "ether"),
+        }
     )
-    assert ACCOUNT_ADDRESS is not None, "Failed to set account"
-
-    logger.info(f"{ACCOUNT_ADDRESS = }")
-    if not INFURA_URL:  # This means we are using the tester provider
-        logger.info("Sending 1 ether to the account for testing purposes")
-        account1 = tester.get_accounts()[0]
-        txn = web3.eth.send_transaction(
-            {
-                "from": account1,
-                "to": ACCOUNT_ADDRESS,
-                "value": web3.to_wei(1, "ether"),
-            }
-        )
-        logger.info("Txn: {txn}", txn=txn)
-    contract = create_contract(CONTRACT_ADDRESS, ACCOUNT_ADDRESS)
 
 
 def hash_data(*args: str) -> bytes:
@@ -57,8 +43,6 @@ def hash_data(*args: str) -> bytes:
 
 
 def create_contract(contract_address: str | None, deployer_address: str):
-    assert web3 is not None, "Module not initialized"
-
     with open("../contract/CertificateFactory-abi.json", "r") as file:
         contract_abi = json.load(file)
 
@@ -112,14 +96,13 @@ def create_contract(contract_address: str | None, deployer_address: str):
     return web3.eth.contract(address=deployed_addr, abi=contract_abi)
 
 
+contract = create_contract(CONTRACT_ADDRESS, ACCOUNT_ADDRESS)
+
+
 def create_certificate(computed_hash: bytes, verification_hash: bytes):
     """
     Create a certificate on the blockchain
     """
-    assert web3 is not None, "Module not initialized"
-    assert contract is not None, "Module not initialized"
-    assert ACCOUNT_ADDRESS is not None, "Module not initialized"
-
     # Fetch the current base fee from the latest block
     latest_block = web3.eth.get_block("latest")
     base_fee = latest_block["baseFeePerGas"]
@@ -161,7 +144,6 @@ def create_certificate(computed_hash: bytes, verification_hash: bytes):
 
 
 def verify_certificate(verification_hash: bytes) -> bool:
-    assert contract is not None, "Module not initialized"
     logger.info(
         "Verifying certificates using verification_hash={verification_hash}",
         verification_hash=verification_hash,

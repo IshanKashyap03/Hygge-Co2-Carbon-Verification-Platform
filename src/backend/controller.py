@@ -1,6 +1,6 @@
 import certificate
 from accounting_client import CertificateDataClient
-from logger import logger, logger_close, logger_setup
+from logger import logger, logger_close
 from datetime import datetime
 import models
 from utils import (
@@ -19,11 +19,8 @@ async def lifespan(_):
     This function is called when the application starts up and shuts down. It is used to initialize and clean up resources.
     Used by FastAPI to manage the application's lifecycle.
     """
-    logger_setup()  # This must be the first line of the lifespan function
     logger.info("Application starting up")
-
     # Add startup code after this line but before the yield
-    certificate.setup_certificate_module()
     models.database_setup()
     client = CertificateDataClient(create_certificate, logger)
     client.start()
@@ -35,6 +32,7 @@ async def lifespan(_):
 
     # Close the logger, this should be the last line of the shutdown code
     await logger_close()
+
 
 
 @logger.catch
