@@ -2,6 +2,10 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
+# Make sure that the logging directory exists
+ENV LOGGER_DIR=/var/log/app/
+RUN mkdir -p ${LOGGER_DIR}
+
 # Install PostgreSQL client and development libraries (so we can use psql)
 RUN apt-get update && \
     apt-get install -y libpq-dev gcc postgresql-client && \

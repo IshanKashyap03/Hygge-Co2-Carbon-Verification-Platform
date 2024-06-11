@@ -1,6 +1,8 @@
 from loguru import logger
-from config import LOGGER_DIAGNOSE
+from config import LOGGER_DIR, LOGGER_DIAGNOSE
 from sys import stderr
+
+__log_file_switch = True
 
 
 def logger_setup() -> None:
@@ -16,12 +18,13 @@ def logger_setup() -> None:
 
     # Log everything to a file
     logger.add(
-        "logs.log",
+        f"{LOGGER_DIR}logs.log",
         serialize=True,
-        rotation="500 MB",
+        rotation=__log_file_retention,
         enqueue=True,
         diagnose=LOGGER_DIAGNOSE,
         format=default_log_format,
+        retention="1 week",
     )
 
     # Log warnings and above to stderr
@@ -41,5 +44,10 @@ async def logger_close() -> None:
     logger.remove()  # Clear existing sinks to prevent semaphore leakage
 
 
-# TODO: Move this to lifespan function in endpoints.py after refactoring certificate.py
-logger_setup()
+def __log_file_retention(message, file) -> bool:
+    """Switches the log file on a new run"""
+    global __log_file_switch
+    if __log_file_switch:
+        __log_file_switch = False
+        return True
+    return False

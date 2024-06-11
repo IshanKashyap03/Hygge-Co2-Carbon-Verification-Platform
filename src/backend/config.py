@@ -44,6 +44,7 @@ CERTIFICATE_DATA_BROKER_TOPIC: Final[str] = extract_env_var(
 
 # Logger details
 LOGGER_DIAGNOSE: Final[bool] = True  # TODO: Update to this to False when in production
+LOGGER_DIR: Final[str] = os.getenv("LOGGER_DIR") or ""
 
 # Database details
 DATABASE_NAME: Final[str] = extract_env_var("DATABASE_NAME")

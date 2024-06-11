@@ -27,6 +27,8 @@ services:
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
     networks:
       - my-network
+    volumes:
+      - ./logs:/var/log/app
 
   db:
     image: postgres:14
