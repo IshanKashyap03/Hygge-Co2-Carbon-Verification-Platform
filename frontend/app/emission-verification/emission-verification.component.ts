@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { HttpClientModule } from '@angular/common/http';
 import { CertificateVerificationData } from '../interfaces/responses/models';
 import { Validators } from '@angular/forms';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-emission-verification',

@@ -7,25 +7,24 @@
       "projectType": "application",
       "schematics": {},
       "root": "",
-      "sourceRoot": "src",
+      "sourceRoot": "frontend",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": "dist/hygge-co2-certificate-verification-portal",
-            "index": "src/index.html",
-            "browser": "src/main.ts",
+            "index": "frontend/index.html",
+            "browser": "frontend/main.ts",
             "polyfills": [
               "zone.js"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
-              "src/favicon.ico",
-              "src/assets"
+              "frontend/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "frontend/styles.css"
             ],
             "scripts": []
           },
@@ -46,8 +45,8 @@
               "outputHashing": "all",
               "fileReplacements": [
                 {
-                  "replace": "src/app/environments/environment.ts",
-                  "with": "src/app/environments/environment.prod.ts"
+                  "replace": "frontend/environments/environment.ts",
+                  "with": "frontend/environments/environment.prod.ts"
                 }
               ]
             },
@@ -62,8 +61,8 @@
               "sourceMap": true,
               "fileReplacements": [
                 {
-                  "replace": "src/app/environments/environment.ts",
-                  "with": "src/app/environments/environment.test.ts"
+                  "replace": "frontend/environments/environment.ts",
+                  "with": "frontend/environments/environment.test.ts"
                 }
               ]
             }
@@ -79,7 +78,7 @@
             "development": {
               "buildTarget": "hygge-co2-certificate-verification-portal:build:development"
             },
-            "test":{
+            "test": {
               "buildTarget": "hygge-co2-certificate-verification-portal:build:test"
             }
           },
@@ -100,11 +99,10 @@
             ],
             "tsConfig": "tsconfig.spec.json",
             "assets": [
-              "src/favicon.ico",
-              "src/assets"
+              "frontend/assets"
             ],
             "styles": [
-              "src/styles.css"
+              "frontend/styles.css"
             ],
             "scripts": []
           }

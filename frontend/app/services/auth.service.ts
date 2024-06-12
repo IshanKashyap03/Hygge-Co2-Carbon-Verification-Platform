@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 import { CookieStorageService } from './cookie-storage.service';
 import { OtpRequestResponse, OtpVerificationResponse } from '../interfaces/responses/models';
 import { OtpRequest, OtpVerificationRequest } from '../interfaces/requests/models';

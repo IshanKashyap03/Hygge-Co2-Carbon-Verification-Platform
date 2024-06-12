@@ -4,11 +4,9 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
+# Copy the Angular project files
 COPY angular.json tsconfig.json tsconfig.app.json ./
-RUN mkdir src
-COPY src/index.html src/main.ts src/styles.css  src/
-COPY src/assets src/assets
-COPY src/app src/app
+COPY frontend/ frontend/
 
 RUN npm run build-dev
 
