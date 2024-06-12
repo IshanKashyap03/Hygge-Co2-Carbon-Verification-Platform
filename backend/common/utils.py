@@ -1,5 +1,15 @@
 from datetime import datetime
 
+import paho.mqtt.client as mqtt
+
+PAHO_LOG_LEVELS = {
+    mqtt.MQTT_LOG_INFO: "INFO",
+    mqtt.MQTT_LOG_NOTICE: "SUCCESS",
+    mqtt.MQTT_LOG_WARNING: "WARNING",
+    mqtt.MQTT_LOG_ERR: "ERROR",
+    mqtt.MQTT_LOG_DEBUG: "DEBUG",
+}
+
 
 def is_float(value: str) -> bool:
     try:

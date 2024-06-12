@@ -1,6 +1,7 @@
-from dotenv import load_dotenv
 import os
 from typing import Final, Optional
+
+from dotenv import load_dotenv
 
 
 def extract_env_var(env_var: str) -> str:
@@ -26,6 +27,9 @@ PRIVATE_KEY: Final[str] = (
     else "0x58d23b55bc9cdce1f18c2500f40ff4ab7245df9a89505e9b1fa4851f623d241d"
 )
 
+# Logger details
+LOGGER_DIAGNOSE: Final[bool] = True  # TODO: Update to this to False when in production
+LOGGER_DIR: Final[str] = os.getenv("LOGGER_DIR") or ""
 
 # MQTT broker details
 CERTIFICATE_DATA_BROKER_URL: Final[str] = extract_env_var("CERTIFICATE_DATA_BROKER_URL")
@@ -41,9 +45,10 @@ CERTIFICATE_DATA_BROKER_PASSWORD: Final[str] = extract_env_var(
 CERTIFICATE_DATA_BROKER_TOPIC: Final[str] = extract_env_var(
     "CERTIFICATE_DATA_BROKER_TOPIC"
 )
-
-# Logger details
-LOGGER_DIAGNOSE: Final[bool] = True  # TODO: Update to this to False when in production
+CERTIFICATE_DATA_BROKER_ID: Final[str] = extract_env_var("CERTIFICATE_DATA_BROKER_ID")
+CERTIFICATE_PUBLISHER_TOPIC: Final[str] = extract_env_var("CERTIFICATE_PUBLISHER_TOPIC")
+CERTIFICATE_PUBLISHER_ID: Final[str] = extract_env_var("CERTIFICATE_PUBLISHER_ID")
+PAHO_QUALITY_OF_SERVICE_LEVEL_AT_MOST_ONCE: Final[int] = 2
 
 # Database details
 DATABASE_NAME: Final[str] = extract_env_var("DATABASE_NAME")
@@ -51,6 +56,7 @@ DATABASE_USER: Final[str] = extract_env_var("DATABASE_USER")
 DATABASE_PASSWORD: Final[str] = extract_env_var("DATABASE_PASSWORD")
 DATABASE_HOST: Final[str] = os.getenv("DATABASE_HOST", "localhost")
 DATABASE_PORT: Final[int] = int(extract_env_var("DATABASE_PORT"))
+PUBLISHER_DATABASE_NAME: Final[str] = extract_env_var("PUBLISHER_DATABASE_NAME")
 
 # JWT details
 JWT_SECRET_KEY: Final[str] = extract_env_var("SECRET_KEY")

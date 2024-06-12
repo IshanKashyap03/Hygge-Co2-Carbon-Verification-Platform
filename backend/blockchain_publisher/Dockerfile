@@ -1,4 +1,4 @@
-# Used for deployment only
+# Use a base Python image
 FROM python:3.10-slim
 
 WORKDIR /app
@@ -9,11 +9,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY .env .
 COPY .env.test .
 
-# Copy the api code
-COPY backend/api ./backend/api
+COPY backend/blockchain_publisher ./backend/blockchain_publisher
 COPY backend/common ./backend/common
 
-# Setup api
+# Copy the configuration files
 COPY pyproject.toml setup.cfg setup.py ./
 RUN pip install -e .
 
@@ -21,5 +20,4 @@ RUN pip install -e .
 ENV LOGGER_DIR=/var/log/app/
 RUN mkdir -p ${LOGGER_DIR}
 
-CMD cd /app/backend/api && uvicorn backend.api.endpoints:app --host 0.0.0.0 --port 7090
-
+CMD cd /app/backend/blockchain_publisher && python -m main

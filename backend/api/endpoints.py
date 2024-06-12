@@ -1,13 +1,13 @@
-from fastapi import FastAPI, HTTPException, Request, Depends
-from fastapi.middleware.cors import CORSMiddleware
-
 import time
-from pydantic import BaseModel
-from controller import verify_certificate, lifespan
-import uvicorn
-from logger import logger
-from auth import get_current_user
 
+import uvicorn
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+from backend.api.auth import get_current_user
+from backend.api.controller import lifespan, verify_certificate
+from backend.common.logger import logger
 
 app = FastAPI(lifespan=lifespan)
 
@@ -56,4 +56,4 @@ async def log_middleware(request: Request, call_next):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=7090, reload=True)
+    uvicorn.run(app, host="127.0.0.1", port=7090)

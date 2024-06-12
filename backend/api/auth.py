@@ -1,8 +1,9 @@
-from fastapi import HTTPException, Security
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
-from config import JWT_SECRET_KEY, JWT_ALGORITHM
-from logger import logger
+from fastapi import HTTPException, Security
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+
+from backend.common.config import JWT_ALGORITHM, JWT_SECRET_KEY
+from backend.common.logger import logger
 
 security = HTTPBearer()
 

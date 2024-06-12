@@ -1,16 +1,16 @@
-import certificate
-from accounting_client import CertificateDataClient
-from logger import logger, logger_close
-from datetime import datetime
-import models
-from utils import (
-    start_end_datetime_to_str,
-    start_end_date_to_datetime,
-    issue_date_to_datetime,
-)
-
-from typing import Callable, Any
 from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Any, Callable
+
+import backend.common.certificate as certificate
+from backend.api import models
+from backend.api.accounting_client import CertificateDataClient
+from backend.common.logger import logger, logger_close, logger_setup
+from backend.common.utils import (
+    issue_date_to_datetime,
+    start_end_date_to_datetime,
+    start_end_datetime_to_str,
+)
 
 
 @asynccontextmanager
@@ -19,20 +19,20 @@ async def lifespan(_):
     This function is called when the application starts up and shuts down. It is used to initialize and clean up resources.
     Used by FastAPI to manage the application's lifecycle.
     """
+    logger_setup("hcevp_api")  # This must be the first line
     logger.info("Application starting up")
-    # Add startup code after this line but before the yield
+    certificate.setup_certificate_module()
     models.database_setup()
     client = CertificateDataClient(create_certificate, logger)
     client.start()
 
     yield
+
     logger.info("Application shutting down")
-    # Add shutdown code after this line
     client.stop()
 
     # Close the logger, this should be the last line of the shutdown code
     await logger_close()
-
 
 
 @logger.catch
@@ -71,84 +71,35 @@ def create_certificate(
     company_name: str,
     issue_date: datetime,
     user_id: str,
+    transaction_hash: str,
+    transaction_date: datetime,
+    certificate_address: str,
 ) -> None:
-    if start_time > end_time:
-        logger.warning("Start time must be less than end time")
-        return
-    if amount < 0:
-        logger.warning("Amount can't be negative")
-        return
-
-    # Certificate ids must be unique in the database
     if models.does_certificate_exist(certificate_id):
         logger.warning(
-            "Certificate with {certificate_id} already exists in the database",
-            certificate_id=certificate_id,
+            "Certificate {certificate_id} already exists", certificate_id=certificate_id
         )
         return
 
-    # Create user if not present
+    verificatation_hash = certificate.hash_data(certificate_id, str(amount))
+    if not certificate.verify_certificate(verificatation_hash):
+        logger.warning("Certificate doesn't exists on the chain. ")
+        return
+
     models.user_create(user_id)
-
-    # Add data from certificate to the database
     models.certificate_create(
-        certificate_id, amount, start_time, end_time, company_name, issue_date, user_id
-    )
-
-    # Hash the data needed for certificate
-    verification_hash = certificate.hash_data(certificate_id, str(amount))
-    computed_hash = certificate.hash_data(
-        str(certificate_id), str(amount), str(start_time), str(end_time), company_name
-    )
-
-    models.certificate_set_transaction_status(
-        certificate_id, models.TransactionStatus.IN_PROGRESS
-    )
-
-    # Attempt to create a certificate on the blockchain
-    transaction = None
-    try:
-        transaction = certificate.create_certificate(computed_hash, verification_hash)
-    except Exception as e:
-        logger.error("Error creating certificate: {exception}", exception=e)
-        models.certificate_set_transaction_status(
-            certificate_id, models.TransactionStatus.FAILED
-        )
-        return
-
-    # Unknown error
-    if transaction is None:
-        logger.error(
-            "Error creating certificate: {transaction}", transaction=transaction
-        )
-        models.certificate_set_transaction_status(
-            certificate_id, models.TransactionStatus.FAILED
-        )
-        return
-
-    # Transaction was reverted by EVM
-    if transaction["status"] != certificate.ETHEREUM_TRANSACTION_SUCCESS:
-        logger.error(
-            "Error creating certificate: {transaction}", transaction=transaction
-        )
-        models.certificate_set_transaction_status(
-            certificate_id,
-            models.TransactionStatus.REVERTED,
-        )
-        return
-
-    # Based on the version of Python not the package it uses different attribute names
-    try:
-        transaction_hash = transaction["transactionHash"]
-    except KeyError:
-        transaction_hash = transaction["transaction_hash"]
-
-    # Add transaction details to the database as was successful
-    models.certificate_add_transaction(
         certificate_id,
-        transaction_hash.hex(),
-        datetime.now(),
+        amount,
+        start_time,
+        end_time,
+        company_name,
+        issue_date,
+        user_id,
+        transaction_hash,
+        transaction_date,
+        certificate_address,
     )
+    logger.info("Certificate {certificate_id} created", certificate_id=certificate_id)
 
 
 def get_data_from_user(prompt: str, convert: Callable[[str], Any]) -> Any:
@@ -161,7 +112,7 @@ def get_data_from_user(prompt: str, convert: Callable[[str], Any]) -> Any:
             print(f"Raw data: {raw_data} can't be converted")
 
 
-def main():
+def add_certificate_to_backend():
     while input("Do you want to add a certificate to the backend (y/n): ") == "y":
         # Get user data
         certificate_id = input("Enter certificate id: ")
@@ -202,11 +153,15 @@ def main():
             company_name,
             issue_date,
             user_id,
-        )
-        models.certificate_add_transaction(
-            certificate_id, transaction_hash, datetime.now()
+            transaction_hash,
+            datetime.now(),
+            "",
         )
         print(f"Successful added certificate {certificate_id}")
+
+
+def main():
+    add_certificate_to_backend()
 
 
 if __name__ == "__main__":

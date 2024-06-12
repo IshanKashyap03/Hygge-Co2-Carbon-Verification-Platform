@@ -37,6 +37,7 @@ yarn-error.log
 testem.log
 /typings
 .env
+.env.test
 *.log
 
 # System files
@@ -47,3 +48,4 @@ Thumbs.db
 .venv/
 venv/
 __pycache__/
+*.egg-info/

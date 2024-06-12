@@ -35,9 +35,8 @@ docker-compose down
 
 The application doesn't have any data when starting up. You must run the following from the root of the project directory:
 ```bash
-docker ps # to get the container id of the db
-CONTAINER_ID=<container_id> 
-docker cp src/backend/db_data.sql $CONTAINER_ID:/your_database.dump # to copy the dump file to the container
+CONTAINER_ID=hygge-co2-emissions-certificate-verification-portal-db-1
+docker cp backend/db_data.sql $CONTAINER_ID:/your_database.dump # to copy the dump file to the container
 docker exec -it $CONTAINER_ID psql -U <your_username> -d <your_database> -f /your_database.dump # to restore the dump file
 ```
 

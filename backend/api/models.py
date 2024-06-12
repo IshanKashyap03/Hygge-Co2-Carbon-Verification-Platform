@@ -1,14 +1,15 @@
-import peewee as sql
+from copy import deepcopy
 from datetime import datetime
-from config import (
+
+import peewee as sql
+
+from backend.common.config import (
     DATABASE_HOST,
     DATABASE_NAME,
-    DATABASE_USER,
     DATABASE_PASSWORD,
     DATABASE_PORT,
+    DATABASE_USER,
 )
-import enum
-from copy import deepcopy
 
 psql_db = sql.PostgresqlDatabase(
     DATABASE_NAME,
@@ -24,19 +25,6 @@ class BaseModel(sql.Model):
 
     class Meta:
         database = psql_db
-
-
-class TransactionStatus(enum.Enum):
-    NOT_STARTED = enum.auto()
-    IN_PROGRESS = enum.auto()
-    COMPLETED = enum.auto()
-    FAILED = enum.auto()
-    REVERTED = enum.auto()
-
-    @classmethod
-    def choices(cls):
-        """Name is used for the database"""
-        return [(i, i.name) for i in list(cls)]
 
 
 class User(BaseModel):
@@ -62,9 +50,6 @@ class Certificate(BaseModel):
 
     # Transaction details:
     transaction_date = sql.DateTimeField(null=True)
-    transaction_status = sql.CharField(
-        choices=TransactionStatus.choices, default=TransactionStatus.NOT_STARTED.name
-    )
     transaction_hash = sql.CharField(max_length=64, null=True, default=None)
     certificate_address = sql.CharField(max_length=40, null=True, default=None)
 
@@ -107,6 +92,9 @@ def certificate_create(
     company_name: str,
     issue_date: datetime,
     user_id: str,
+    transaction_hash: str,
+    transaction_date: datetime,
+    certificate_address: str,
 ) -> None:
     """Creates a new certificate in the database."""
     user = User.get(User.account_id == user_id)
@@ -119,31 +107,12 @@ def certificate_create(
         total_emission=amount,
         issue_date=issue_date,
         created_date=datetime.now(),
+        transaction_hash=transaction_hash[2:]
+        if transaction_hash.startswith("0x")
+        else transaction_hash,
+        transaction_date=transaction_date,
+        certificate_address=certificate_address,
     )
-
-
-def certificate_set_transaction_status(
-    certificate_id: str, status: TransactionStatus, date: datetime | None = None
-) -> None:
-    """Set the transaction status to pending."""
-    certificate = Certificate.get(Certificate.certificate_number == certificate_id)
-    certificate.transaction_status = status.name
-    certificate.transaction_date = date if date is not None else datetime.now()
-    certificate.save()
-
-
-# TODO: Add certificate_address, once contract is fixed to show address of created certificate
-def certificate_add_transaction(
-    certificate_id: str, transaction_hash: str, created_date: datetime
-) -> None:
-    """Add the transaction details to the certificate."""
-    certificate = Certificate.get(Certificate.certificate_number == certificate_id)
-    certificate.transaction_hash = (
-        transaction_hash[2:] if transaction_hash.startswith("0x") else transaction_hash
-    )
-    certificate.transaction_date = created_date
-    certificate.transaction_status = TransactionStatus.COMPLETED.name
-    certificate.save()
 
 
 def certificate_verification_attempt_create(

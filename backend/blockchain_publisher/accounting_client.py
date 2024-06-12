@@ -1,28 +1,33 @@
 import json
 from typing import Callable
+
 import paho.mqtt.client as mqtt
 
-from config import (
-    CERTIFICATE_DATA_BROKER_USERNAME,
-    CERTIFICATE_DATA_BROKER_PORT,
-    CERTIFICATE_DATA_BROKER_URL,
+from backend.common.config import (
     CERTIFICATE_DATA_BROKER_PASSWORD,
+    CERTIFICATE_DATA_BROKER_PORT,
     CERTIFICATE_DATA_BROKER_TOPIC,
+    CERTIFICATE_DATA_BROKER_URL,
+    CERTIFICATE_DATA_BROKER_USERNAME,
+    CERTIFICATE_PUBLISHER_ID,
+    CERTIFICATE_PUBLISHER_TOPIC,
+    PAHO_QUALITY_OF_SERVICE_LEVEL_AT_MOST_ONCE,
 )
-from utils import is_float, issue_date_to_datetime, start_end_date_to_datetime
-
-PAHO_LOG_LEVELS = {
-    mqtt.MQTT_LOG_INFO: "INFO",
-    mqtt.MQTT_LOG_NOTICE: "SUCCESS",
-    mqtt.MQTT_LOG_WARNING: "WARNING",
-    mqtt.MQTT_LOG_ERR: "ERROR",
-    mqtt.MQTT_LOG_DEBUG: "DEBUG",
-}
+from backend.common.utils import (
+    is_float,
+    issue_date_to_datetime,
+    start_end_date_to_datetime,
+    PAHO_LOG_LEVELS,
+)
 
 
-class CertificateDataClient:
+class BlockchainCertificatePublisher:
     def __init__(self, data_process_callback: Callable, logger) -> None:
-        self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+        self.client = mqtt.Client(
+            mqtt.CallbackAPIVersion.VERSION2,
+            clean_session=False,
+            client_id=CERTIFICATE_PUBLISHER_ID,
+        )
         self.set_username_password(
             CERTIFICATE_DATA_BROKER_USERNAME, CERTIFICATE_DATA_BROKER_PASSWORD
         )
@@ -33,8 +38,9 @@ class CertificateDataClient:
         self.logger = logger
         self.url = CERTIFICATE_DATA_BROKER_URL
         self.port = CERTIFICATE_DATA_BROKER_PORT
-        self.topic = CERTIFICATE_DATA_BROKER_TOPIC
-        self.logger.info("Certificate Data Client Initialized")
+        self.receive_topic = CERTIFICATE_DATA_BROKER_TOPIC
+        self.send_topic = CERTIFICATE_PUBLISHER_TOPIC
+        self.logger.info("Publisher Data Client Initialized")
 
     def start(self):
         """Starts the client by connecting to the broker and starting the loop"""
@@ -56,9 +62,13 @@ class CertificateDataClient:
         self.url = url
         self.port = port
 
-    def set_topic(self, topic: str) -> None:
+    def set_receive_topic(self, topic: str) -> None:
         """Sets the topic to allow the client to subscribe to the provided topic"""
-        self.topic = topic
+        self.receive_topic = topic
+
+    def set_send_topic(self, topic: str) -> None:
+        """Sets the topic to allow the client to publish to the provided topic"""
+        self.send_topic = topic
 
     def _validate_data(self, data_name: str, data: str | None) -> bool:
         """Validates if the data is provided. If not, logs an error message and returns True"""
@@ -128,8 +138,7 @@ class CertificateDataClient:
             self.logger.critical("issue_date is not in the correct format")
             return
 
-        # TODO: Change this back to info and remove the return statement
-        self.logger.warning(
+        self.logger.success(
             "Received message: {certificate_id}, {amount}, {start_time}, {end_time}, {company_name}, {user_id}, {issue_date}",
             certificate_id=certificate_id,
             amount=amount,
@@ -139,8 +148,7 @@ class CertificateDataClient:
             user_id=user_id,
             issue_date=issue_date,
         )
-
-        self.data_process_callback(
+        result = self.data_process_callback(
             certificate_id,
             float(amount),
             start_time,
@@ -149,12 +157,38 @@ class CertificateDataClient:
             issue_date,
             user_id,
         )
+        if result is None:
+            self.logger.error("Failed to create certificate")
+            return
+
+        actual_transaction_hash, certificate_address, transaction_date = result
+        if actual_transaction_hash is not None:
+            self.logger.info(
+                "Certificate created successfully with transaction hash: {transaction_hash}",
+                transaction_hash=actual_transaction_hash,
+            )
+            combined_data = message_dict | {
+                "transaction_hash": actual_transaction_hash,
+                "certificate_address": certificate_address,
+                "transaction_date": transaction_date.isoformat()
+                if transaction_date
+                else None,
+            }
+            self.client.publish(
+                self.send_topic,
+                json.dumps(combined_data),
+                qos=PAHO_QUALITY_OF_SERVICE_LEVEL_AT_MOST_ONCE,
+            )
+        else:
+            self.logger.error("Failed to create certificate")
 
     def _on_connect(self, client, userdata, flags, reason_code, properties) -> None:
         """Callback function when connecting to the broker"""
         if reason_code == 0:
             self.logger.info("Connected to MQTT Broker!")
-            client.subscribe(self.topic)
+            client.subscribe(
+                self.receive_topic, qos=PAHO_QUALITY_OF_SERVICE_LEVEL_AT_MOST_ONCE
+            )
         else:
             self.logger.error(
                 "Failed to connect, return code {reason_code}", reason_code=reason_code
