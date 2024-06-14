@@ -4,7 +4,6 @@ from typing import Callable
 
 import paho.mqtt.client as mqtt
 
-# TODO: Setup credentials for broker blockchain publisher, then change these
 from backend.common.config import (
     CERTIFICATE_DATA_BROKER_ID,
     CERTIFICATE_DATA_BROKER_PASSWORD,

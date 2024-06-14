@@ -41,10 +41,10 @@ services:
     env_file:
       - .env.test
     environment:
-      DATABASE_HOST: db
+      PUBLISHER_DATABASE_HOST: db
       POSTGRES_DB: ${PUBLISHER_DATABASE_NAME}
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_USER: ${PUBLISHER_DATABASE_USER}
+      POSTGRES_PASSWORD: ${PUBLISHER_DATABASE_PASSWORD}
       ENV: test
     networks:
       - test-network

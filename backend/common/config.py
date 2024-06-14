@@ -50,13 +50,19 @@ CERTIFICATE_PUBLISHER_TOPIC: Final[str] = extract_env_var("CERTIFICATE_PUBLISHER
 CERTIFICATE_PUBLISHER_ID: Final[str] = extract_env_var("CERTIFICATE_PUBLISHER_ID")
 PAHO_QUALITY_OF_SERVICE_LEVEL_AT_MOST_ONCE: Final[int] = 2
 
-# Database details
-DATABASE_NAME: Final[str] = extract_env_var("DATABASE_NAME")
-DATABASE_USER: Final[str] = extract_env_var("DATABASE_USER")
-DATABASE_PASSWORD: Final[str] = extract_env_var("DATABASE_PASSWORD")
-DATABASE_HOST: Final[str] = os.getenv("DATABASE_HOST", "localhost")
-DATABASE_PORT: Final[int] = int(extract_env_var("DATABASE_PORT"))
+# API Database Config
+API_DATABASE_NAME: Final[str] = extract_env_var("DATABASE_NAME")
+API_DATABASE_USER: Final[str] = extract_env_var("DATABASE_USER")
+API_DATABASE_PASSWORD: Final[str] = extract_env_var("DATABASE_PASSWORD")
+API_DATABASE_HOST: Final[str] = os.getenv("DATABASE_HOST", "localhost")
+API_DATABASE_PORT: Final[int] = int(extract_env_var("DATABASE_PORT"))
+
+# Publisher Database Config
 PUBLISHER_DATABASE_NAME: Final[str] = extract_env_var("PUBLISHER_DATABASE_NAME")
+PUBLISHER_DATABASE_USER: Final[str] = extract_env_var("PUBLISHER_DATABASE_USER")
+PUBLISHER_DATABASE_PASSWORD: Final[str] = extract_env_var("PUBLISHER_DATABASE_PASSWORD")
+PUBLISHER_DATABASE_HOST: Final[str] = os.getenv("PUBLISHER_DATABASE_HOST", "localhost")
+PUBLISHER_DATABASE_PORT: Final[int] = int(extract_env_var("PUBLISHER_DATABASE_PORT"))
 
 # JWT details
 JWT_SECRET_KEY: Final[str] = extract_env_var("SECRET_KEY")

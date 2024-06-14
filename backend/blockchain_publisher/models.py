@@ -4,19 +4,19 @@ from datetime import datetime
 import peewee as sql
 
 from backend.common.config import (
-    DATABASE_HOST,
-    DATABASE_PASSWORD,
-    DATABASE_PORT,
-    DATABASE_USER,
+    PUBLISHER_DATABASE_HOST,
+    PUBLISHER_DATABASE_PASSWORD,
+    PUBLISHER_DATABASE_PORT,
+    PUBLISHER_DATABASE_USER,
     PUBLISHER_DATABASE_NAME,
 )
 
 psql_db = sql.PostgresqlDatabase(
     PUBLISHER_DATABASE_NAME,
-    user=DATABASE_USER,
-    password=DATABASE_PASSWORD,
-    host=DATABASE_HOST,
-    port=DATABASE_PORT,
+    user=PUBLISHER_DATABASE_USER,
+    password=PUBLISHER_DATABASE_PASSWORD,
+    host=PUBLISHER_DATABASE_HOST,
+    port=PUBLISHER_DATABASE_PORT,
 )
 
 

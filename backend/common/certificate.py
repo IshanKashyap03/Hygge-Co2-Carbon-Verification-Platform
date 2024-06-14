@@ -2,6 +2,7 @@
 # TODO: Refactor to remove globals
 import json
 from pathlib import Path
+from typing import Final
 
 from eth_tester import EthereumTester
 from eth_typing import ChecksumAddress
@@ -15,7 +16,7 @@ from backend.common.config import (
 )
 from backend.common.logger import logger
 
-ETHEREUM_TRANSACTION_SUCCESS = 1
+ETHEREUM_TRANSACTION_SUCCESS: Final[int] = 1
 
 # Module variables
 web3: Web3 | None = None
