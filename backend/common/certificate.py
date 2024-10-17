@@ -7,12 +7,14 @@ from typing import Final
 from eth_tester import EthereumTester
 from eth_typing import ChecksumAddress
 from web3 import EthereumTesterProvider, Web3
+from web3.middleware import geth_poa_middleware
+
 
 from backend.common.config import (
-    CONTRACT_ADDRESS,
+    CONTRACT_ADDRESS_AMOY,
     ENV_ACCOUNT_ADDRESS,
-    INFURA_URL,
     PRIVATE_KEY,
+    AMOY_URL
 )
 from backend.common.logger import logger
 
@@ -29,36 +31,60 @@ def setup_certificate_module():
     assert web3 is None, "Module already initialized"
 
     # Connect to Ethereum node using Infura
-    provider = Web3.HTTPProvider(INFURA_URL) if INFURA_URL else EthereumTesterProvider()
+    # provider = Web3.HTTPProvider(INFURA_URL) if INFURA_URL else EthereumTesterProvider()
+
+    # Connect to Amoy Testnet
+    provider = Web3.HTTPProvider(AMOY_URL)
     web3 = Web3(provider)
-    tester = EthereumTester()
+    # tester = EthereumTester()
+
+    # adding middleware to tell web3 that we are dealing with a Proof of Authority chain (Polygon)
+    web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
     # Check connection
     if not web3.is_connected():
-        logger.critical("Failed to connect to Ethereum")
-        raise Exception("Failed to connect to Ethereum")
+        logger.critical("Failed to connect to Amoy Testnet")
+        raise Exception("Failed to connect to Amoy Testnet")
+
+    # # Check connection
+    # if not web3.is_connected():
+    #     logger.critical("Failed to connect to Ethereum")
+    #     raise Exception("Failed to connect to Ethereum")
 
     # Set account
     ACCOUNT_ADDRESS = (
         web3.to_checksum_address(ENV_ACCOUNT_ADDRESS)
         if ENV_ACCOUNT_ADDRESS
-        else tester.add_account(PRIVATE_KEY)
+        else web3.eth.account.from_key(PRIVATE_KEY).address
     )
     assert ACCOUNT_ADDRESS is not None, "Failed to set account"
 
     logger.info(f"{ACCOUNT_ADDRESS = }")
-    if not INFURA_URL:  # This means we are using the tester provider
-        logger.info("Sending 1 ether to the account for testing purposes")
-        account1 = tester.get_accounts()[0]
-        txn = web3.eth.send_transaction(
-            {
-                "from": account1,
-                "to": ACCOUNT_ADDRESS,
-                "value": web3.to_wei(1, "ether"),
-            }
-        )
-        logger.info("Txn: {txn}", txn=txn)
-    contract = create_contract(CONTRACT_ADDRESS, ACCOUNT_ADDRESS)
+    # if not INFURA_URL:  # This means we are using the tester provider
+    #     logger.info("Sending 1 ether to the account for testing purposes")
+    #     account1 = tester.get_accounts()[0]
+    #     txn = web3.eth.send_transaction(
+    #         {
+    #             "from": account1,
+    #             "to": ACCOUNT_ADDRESS,
+    #             "value": web3.to_wei(1, "ether"),
+    #         }
+    #     )
+    #     logger.info("Txn: {txn}", txn=txn)
+
+    # if not AMOY_URL:  # This means we are using the tester provider
+    #     logger.info("Sending 1 ether to the account for testing purposes")
+    #     account1 = tester.get_accounts()[0]
+    #     txn = web3.eth.send_transaction(
+    #         {
+    #             "from": account1,
+    #             "to": ACCOUNT_ADDRESS,
+    #             "value": web3.to_wei(1, "ether"),
+    #         }
+    #     )
+    #     logger.info("Txn: {txn}", txn=txn)
+
+    contract = create_contract(CONTRACT_ADDRESS_AMOY, ACCOUNT_ADDRESS)
 
 
 def hash_data(*args: str) -> bytes:
@@ -66,6 +92,7 @@ def hash_data(*args: str) -> bytes:
 
 
 def create_contract(contract_address: str | None, deployer_address: str):
+    logger.info(f"{contract_address}")
     assert web3 is not None, "Module not initialized"
 
     # Find the path directly as otherwise it is very unreliable
@@ -103,8 +130,8 @@ def create_contract(contract_address: str | None, deployer_address: str):
         {
             "from": deployer_address,
             "nonce": web3.eth.get_transaction_count(deployer_address),
-            "maxFeePerGas": web3.to_wei("2", "gwei"),
-            "maxPriorityFeePerGas": web3.to_wei("1", "gwei"),
+            "maxFeePerGas": web3.to_wei("50", "gwei"), 
+            "maxPriorityFeePerGas": web3.to_wei("25", "gwei")
         }
     )
     gas = web3.eth.estimate_gas(tx)
@@ -137,7 +164,7 @@ def create_certificate(computed_hash: bytes, verification_hash: bytes):
     base_fee = latest_block["baseFeePerGas"]
 
     # Set a reasonable max priority fee and max fee per gas
-    max_priority_fee = web3.to_wei("2", "gwei")
+    max_priority_fee = web3.to_wei("25", "gwei")
     max_fee = base_fee + max_priority_fee
 
     # Build transaction

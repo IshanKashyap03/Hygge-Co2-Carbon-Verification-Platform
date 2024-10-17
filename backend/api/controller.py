@@ -53,12 +53,12 @@ def verify_certificate(certificate_id: str, amount: float) -> dict:
         return {"status": "Not Verified"}
 
     models.certificate_verification_attempt_create(certificate_id, amount, True)
-    certificate_date = models.certificate_get_data(certificate_id)
+    certificate_data = models.certificate_get_data(certificate_id)
     return {
         "status": "Verified",
-        "companyName": certificate_date["factory_name"],
-        "startDate": start_end_datetime_to_str(certificate_date["start_date"]),
-        "endDate": start_end_datetime_to_str(certificate_date["end_date"]),
+        "companyName": certificate_data["factory_name"],
+        "startDate": start_end_datetime_to_str(certificate_data["start_date"]),
+        "endDate": start_end_datetime_to_str(certificate_data["end_date"]),
     }
 
 

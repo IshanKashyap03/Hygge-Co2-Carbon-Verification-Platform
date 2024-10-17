@@ -16,8 +16,10 @@ ConstEnvVariable = Final[Optional[str]]
 
 # Basic environment variables
 INFURA_URL: ConstEnvVariable = os.getenv("INFURA_URL")
+AMOY_URL: ConstEnvVariable = os.getenv("AMOY_URL")
 ENV_ACCOUNT_ADDRESS: ConstEnvVariable = os.getenv("ACCOUNT_ADDRESS")
 CONTRACT_ADDRESS: ConstEnvVariable = os.getenv("CONTRACT_ADDRESS")
+CONTRACT_ADDRESS_AMOY: ConstEnvVariable = os.getenv("CONTRACT_ADDRESS_AMOY")
 
 # Setup private key
 __PRIVATE_KEY = os.getenv("PRIVATE_KEY")
