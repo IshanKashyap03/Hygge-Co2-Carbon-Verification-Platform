@@ -30,13 +30,9 @@ def setup_certificate_module():
     global web3, contract, ACCOUNT_ADDRESS
     assert web3 is None, "Module already initialized"
 
-    # Connect to Ethereum node using Infura
-    # provider = Web3.HTTPProvider(INFURA_URL) if INFURA_URL else EthereumTesterProvider()
-
     # Connect to Amoy Testnet
     provider = Web3.HTTPProvider(AMOY_URL)
     web3 = Web3(provider)
-    # tester = EthereumTester()
 
     # adding middleware to tell web3 that we are dealing with a Proof of Authority chain (Polygon)
     web3.middleware_onion.inject(geth_poa_middleware, layer=0)
@@ -45,11 +41,6 @@ def setup_certificate_module():
     if not web3.is_connected():
         logger.critical("Failed to connect to Amoy Testnet")
         raise Exception("Failed to connect to Amoy Testnet")
-
-    # # Check connection
-    # if not web3.is_connected():
-    #     logger.critical("Failed to connect to Ethereum")
-    #     raise Exception("Failed to connect to Ethereum")
 
     # Set account
     ACCOUNT_ADDRESS = (
@@ -60,29 +51,6 @@ def setup_certificate_module():
     assert ACCOUNT_ADDRESS is not None, "Failed to set account"
 
     logger.info(f"{ACCOUNT_ADDRESS = }")
-    # if not INFURA_URL:  # This means we are using the tester provider
-    #     logger.info("Sending 1 ether to the account for testing purposes")
-    #     account1 = tester.get_accounts()[0]
-    #     txn = web3.eth.send_transaction(
-    #         {
-    #             "from": account1,
-    #             "to": ACCOUNT_ADDRESS,
-    #             "value": web3.to_wei(1, "ether"),
-    #         }
-    #     )
-    #     logger.info("Txn: {txn}", txn=txn)
-
-    # if not AMOY_URL:  # This means we are using the tester provider
-    #     logger.info("Sending 1 ether to the account for testing purposes")
-    #     account1 = tester.get_accounts()[0]
-    #     txn = web3.eth.send_transaction(
-    #         {
-    #             "from": account1,
-    #             "to": ACCOUNT_ADDRESS,
-    #             "value": web3.to_wei(1, "ether"),
-    #         }
-    #     )
-    #     logger.info("Txn: {txn}", txn=txn)
 
     contract = create_contract(CONTRACT_ADDRESS_AMOY, ACCOUNT_ADDRESS)
 
@@ -130,7 +98,7 @@ def create_contract(contract_address: str | None, deployer_address: str):
         {
             "from": deployer_address,
             "nonce": web3.eth.get_transaction_count(deployer_address),
-            "maxFeePerGas": web3.to_wei("50", "gwei"), 
+            "maxFeePerGas": web3.to_wei("25", "gwei"), 
             "maxPriorityFeePerGas": web3.to_wei("25", "gwei")
         }
     )
